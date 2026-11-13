@@ -78,34 +78,25 @@ async function enableNotifications() {
 }
 
 function showMissedCallNotification(callerName, callId) {
-  if (!currentUser) return;
+  if (!currentUser || !callId) return;
 
-  // Prevent duplicate notifications.
   const storageKey = `connecto_missed_${currentUser.uid}`;
 
   let notified = [];
 
   try {
     notified = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    if (!Array.isArray(notified)) notified = [];
   } catch {
     notified = [];
   }
 
   if (notified.includes(callId)) return;
 
-  notified.push(callId);
-
-  // Keep the list small.
-  notified = notified.slice(-100);
-
-  try {
-    localStorage.setItem(storageKey, JSON.stringify(notified));
-  } catch (error) {
-    console.warn("Could not save notification history:", error);
-  }
-
   const title = "Connecto - Missed Call";
   const body = `${callerName || "Connecto user"} tried to call you.`;
+
+  let notificationShown = false;
 
   if (
     "Notification" in window &&
@@ -123,14 +114,27 @@ function showMissedCallNotification(callerName, callId) {
         notification.close();
       };
 
-      return;
+      notificationShown = true;
     } catch (error) {
       console.error("Browser notification error:", error);
     }
   }
 
-  // Fallback if browser notifications are not allowed.
-  alert(`${title}\n${body}`);
+  if (!notificationShown) {
+    alert(`${title}\n${body}`);
+  }
+
+  // Save only after showing a notification or fallback alert.
+  notified.push(callId);
+
+  try {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(notified.slice(-100))
+    );
+  } catch (error) {
+    console.warn("Could not save notification history:", error);
+  }
 }
 
 function isRecentMissedCall(data) {
@@ -142,6 +146,7 @@ function isRecentMissedCall(data) {
 
   return (
     Number.isFinite(missedTime) &&
+    Date.now() - missedTime >= 0 &&
     Date.now() - missedTime < 10 * 60 * 1000
   );
 }
@@ -299,6 +304,10 @@ async function flipCamera() {
 
     oldTrack.stop();
 
+    newStream.getTracks().forEach(track => {
+      if (track !== newTrack) track.stop();
+    });
+
     cameraFacingMode = newFacingMode;
 
   } catch (error) {
@@ -403,34 +412,38 @@ function listenForRemoteCandidates() {
     "candidates"
   );
 
-  candidateUnsub = onSnapshot(candidatesRef, snapshot => {
-    snapshot.docChanges().forEach(async change => {
-      if (change.type !== "added") return;
+  candidateUnsub = onSnapshot(
+    candidatesRef,
+    snapshot => {
+      snapshot.docChanges().forEach(async change => {
+        if (change.type !== "added") return;
 
-      const data = change.doc.data();
+        const data = change.doc.data();
 
-      if (data.senderId === currentUser.uid) return;
-      if (!data.candidate) return;
+        if (data.senderId === currentUser.uid) return;
+        if (!data.candidate) return;
 
-      if (
-        !peerConnection ||
-        !peerConnection.remoteDescription
-      ) {
-        pendingRemoteCandidates.push(data.candidate);
-        return;
-      }
+        if (
+          !peerConnection ||
+          !peerConnection.remoteDescription
+        ) {
+          pendingRemoteCandidates.push(data.candidate);
+          return;
+        }
 
-      try {
-        await peerConnection.addIceCandidate(
-          new RTCIceCandidate(data.candidate)
-        );
-      } catch (error) {
-        console.error("Remote candidate error:", error);
-      }
-    });
-  }, error => {
-    console.error("Candidate listener error:", error);
-  });
+        try {
+          await peerConnection.addIceCandidate(
+            new RTCIceCandidate(data.candidate)
+          );
+        } catch (error) {
+          console.error("Remote candidate error:", error);
+        }
+      });
+    },
+    error => {
+      console.error("Candidate listener error:", error);
+    }
+  );
 }
 
 // ================= WATCH CALL DOCUMENT =================
@@ -620,7 +633,6 @@ async function startCall(type) {
 
     const thisCallId = currentCallId;
 
-    // 30-second unanswered call timer.
     callTimeout = setTimeout(async () => {
       if (
         currentCallId !== thisCallId ||
@@ -639,7 +651,6 @@ async function startCall(type) {
       }
 
       if (currentCallId === thisCallId) {
-        alert("No answer. The call ended after 30 seconds.");
         cleanupCall();
       }
 
@@ -664,9 +675,13 @@ function listenForIncomingCalls() {
 
   if (!currentUser) return;
 
+  // IMPORTANT FIX:
+  // Query participants instead of receiverId.
+  // This matches the existing Firestore participant read rule.
+
   const callsQuery = query(
     collection(db, "calls"),
-    where("receiverId", "==", currentUser.uid)
+    where("participants", "array-contains", currentUser.uid)
   );
 
   incomingCallUnsub = onSnapshot(
@@ -683,31 +698,29 @@ function listenForIncomingCalls() {
         const data = change.doc.data();
         const changedCallId = change.doc.id;
 
-        // Handle missed calls, including recent ones
-        // that happened while the user was offline.
+        // Only process calls intended for this user.
+        if (data.receiverId !== currentUser.uid) return;
+
+        // Handle missed calls.
         if (data.status === "missed") {
-          const isCurrentIncomingCall =
-            currentCallId === changedCallId && !isCaller;
-
-          const isNewMissedCall =
-            change.type === "modified" ||
-            isRecentMissedCall(data);
-
-          if (isNewMissedCall) {
+          if (isRecentMissedCall(data)) {
             showMissedCallNotification(
               data.callerName || "Connecto user",
               changedCallId
             );
           }
 
-          if (isCurrentIncomingCall) {
+          if (
+            currentCallId === changedCallId &&
+            !isCaller
+          ) {
             cleanupCall();
           }
 
           return;
         }
 
-        // Handle an incoming call that the caller ended.
+        // Handle calls ended or rejected by the caller.
         if (
           currentCallId === changedCallId &&
           !isCaller &&
@@ -720,19 +733,21 @@ function listenForIncomingCalls() {
           return;
         }
 
-        // Only accept calls that are actually ringing.
-        if (
-          data.receiverId !== currentUser.uid ||
-          data.status !== "ringing"
-        ) {
-          return;
-        }
+        // Only show calls that are ringing.
+        if (data.status !== "ringing") return;
 
-        // Do not interrupt an active call.
+        // Prevent duplicate incoming-call screens.
+        if (currentCallId === changedCallId) return;
+
+        // Do not interrupt another active call.
         if (currentCallId || peerConnection) return;
 
         currentCallId = changedCallId;
-        incomingCall = data;
+        incomingCall = {
+          id: changedCallId,
+          ...data
+        };
+
         isCaller = false;
         callAccepted = false;
         microphoneMuted = false;
@@ -1375,7 +1390,6 @@ $("photoInput").addEventListener("change", async event => {
   }
 
   const recipient = selectedUser;
-
   const id = chatId(currentUser.uid, recipient.uid);
 
   const safeName = file.name.replace(
