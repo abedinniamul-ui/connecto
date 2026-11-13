@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,17 +19,9 @@
       color: #20312f;
     }
 
-    button, input {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none !important;
-    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
 
     .auth-page {
       min-height: 100vh;
@@ -78,9 +69,7 @@
       outline: none;
     }
 
-    .auth-card input:focus {
-      border-color: #0b927b;
-    }
+    .auth-card input:focus { border-color: #0b927b; }
 
     .primary {
       background: #087b69;
@@ -91,14 +80,8 @@
       font-weight: bold;
     }
 
-    .primary:hover {
-      background: #066354;
-    }
-
-    .primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .primary:hover { background: #066354; }
+    .primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .auth-card .primary {
       width: 100%;
@@ -149,12 +132,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       padding: 0 18px;
     }
 
-    .topbar h2 {
-      font-size: 25px;
-    }
+    .topbar h2 { font-size: 25px; }
 
     .logout {
       border: 1px solid #ffffff70;
@@ -172,9 +154,32 @@
       overflow-wrap: anywhere;
     }
 
-    .search {
-      padding: 12px;
+    .my-id-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
     }
+
+    .my-id-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #087b69;
+      overflow-wrap: anywhere;
+    }
+
+    .copy-id-btn {
+      border: 0;
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #087b69;
+      color: white;
+    }
+
+    .search { padding: 12px; }
 
     .search input {
       width: 100%;
@@ -202,10 +207,7 @@
       text-align: left;
     }
 
-    .user:hover,
-    .user.active {
-      background: #e8f5f1;
-    }
+    .user:hover, .user.active { background: #e8f5f1; }
 
     .avatar {
       width: 44px;
@@ -230,6 +232,34 @@
       font-size: 12px;
       color: #84908c;
       margin-top: 5px;
+    }
+
+    .user-entry { border-bottom: 1px solid #edf0ef; }
+    .user-entry .user { border-bottom: 0; }
+
+    .save-contact-btn, .remove-contact-btn {
+      border: 0;
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 0 10px 10px;
+    }
+
+    .save-contact-btn {
+      background: #087b69;
+      color: white;
+    }
+
+    .save-contact-btn:disabled {
+      background: #dcebe5;
+      color: #087b69;
+      cursor: default;
+    }
+
+    .remove-contact-btn {
+      background: #fff0f0;
+      color: #c0392b;
     }
 
     .main {
@@ -335,6 +365,7 @@
     }
 
     /* CALL SCREEN */
+
     .call-screen {
       position: fixed;
       inset: 0;
@@ -380,21 +411,9 @@
       font-size: 18px;
     }
 
-    #acceptCallBtn {
-      background: #16a05d;
-      color: white;
-    }
-
-    #declineCallBtn,
-    #endCallBtn {
-      background: #dc3545;
-      color: white;
-    }
-
-    #muteCallBtn {
-      background: #e8f5f1;
-      color: #102b28;
-    }
+    #acceptCallBtn { background: #16a05d; color: white; }
+    #declineCallBtn, #endCallBtn { background: #dc3545; color: white; }
+    #muteCallBtn { background: #e8f5f1; color: #102b28; }
 
     @media (max-width: 650px) {
       .sidebar {
@@ -409,28 +428,20 @@
         justify-content: center;
       }
 
-      .topbar h2 {
-        font-size: 17px;
+      .topbar h2 { font-size: 17px; }
+      .logout { font-size: 10px; padding: 6px; }
+      .me { font-size: 11px; padding: 10px; }
+
+      .my-id-row {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .logout {
-        font-size: 10px;
-        padding: 6px;
-      }
+      .my-id-label { font-size: 10px; }
+      .copy-id-btn { font-size: 10px; padding: 6px; }
 
-      .me {
-        font-size: 11px;
-        padding: 10px;
-      }
-
-      .search {
-        padding: 5px;
-      }
-
-      .search input {
-        font-size: 11px;
-        padding: 9px 5px;
-      }
+      .search { padding: 5px; }
+      .search input { font-size: 11px; padding: 9px 5px; }
 
       .user {
         padding: 12px 5px;
@@ -439,31 +450,18 @@
         text-align: center;
       }
 
-      .user-name {
-        font-size: 11px;
+      .user-name { font-size: 11px; }
+      .user-sub { display: none; }
+      .save-contact-btn, .remove-contact-btn {
+        margin: 0 2px 8px;
+        padding: 6px 3px;
+        font-size: 9px;
       }
 
-      .user-sub {
-        display: none;
-      }
-
-      .chat-head {
-        padding: 10px;
-      }
-
-      .chat-body {
-        padding: 10px;
-      }
-
-      .composer {
-        padding: 8px 4px;
-      }
-
-      .emoji {
-        font-size: 22px;
-        min-width: 35px;
-        padding: 6px;
-      }
+      .chat-head { padding: 10px; }
+      .chat-body { padding: 10px; }
+      .composer { padding: 8px 4px; }
+      .emoji { font-size: 22px; min-width: 35px; padding: 6px; }
     }
   </style>
 </head>
@@ -471,9 +469,6 @@
 <body>
 
   <!-- LOGIN AND REGISTRATION -->
-   <button id="enableNotificationsBtn" type="button">
-  Enable Notifications
-</button>
   <section class="auth-page" id="authPage">
     <div class="auth-card">
       <div class="brand">Connecto</div>
@@ -513,7 +508,8 @@
           placeholder="Email address" autocomplete="email">
 
         <input id="signupPassword" type="password"
-          placeholder="Password (at least 6 characters)" autocomplete="new-password">
+          placeholder="Password (at least 6 characters)"
+          autocomplete="new-password">
 
         <button class="primary" id="signupBtn">Create account</button>
 
@@ -528,27 +524,39 @@
   </section>
 
   <!-- CHAT APP -->
-   <button id="enableNotificationsBtn" type="button">
-  Enable Notifications
-</button>
   <section class="app hidden" id="chatApp">
 
     <aside class="sidebar">
       <header class="topbar">
         <h2>Connecto</h2>
+
+        <button id="enableNotificationsBtn" type="button" class="logout">
+          🔔 Notifications
+        </button>
+
         <button class="logout" id="logoutBtn">Log out</button>
       </header>
 
       <div class="me">
         Logged in as <strong id="myName"></strong>
+
+        <div class="my-id-row">
+          <span class="my-id-label" id="myConnectoId">
+            Connecto ID: Loading...
+          </span>
+
+          <button class="copy-id-btn" id="copyConnectoIdBtn" type="button">
+            📋 Copy ID
+          </button>
+        </div>
       </div>
 
       <div class="search">
-        <input id="userSearch" placeholder="Find people...">
+        <input id="userSearch" placeholder="Search by Connecto ID">
       </div>
 
       <div class="user-list" id="userList">
-        <div class="empty">Loading people...</div>
+        <div class="empty">Loading contacts...</div>
       </div>
     </aside>
 
@@ -563,14 +571,12 @@
         </div>
 
         <div style="display:flex;gap:8px">
-          <button id="voiceCallBtn" type="button"
-            title="Voice call"
+          <button id="voiceCallBtn" type="button" title="Voice call"
             style="border:0;background:#e8f5f1;padding:10px;border-radius:50%;font-size:20px">
             📞
           </button>
 
-          <button id="videoCallBtn" type="button"
-            title="Video call"
+          <button id="videoCallBtn" type="button" title="Video call"
             style="border:0;background:#e8f5f1;padding:10px;border-radius:50%;font-size:20px">
             📹
           </button>
@@ -585,9 +591,7 @@
         </div>
       </div>
 
-      <!-- MESSAGE COMPOSER -->
       <div class="composer">
-
         <div class="emoji-grid" id="emojiGrid">
           <button class="emoji" type="button">😀</button>
           <button class="emoji" type="button">😂</button>
@@ -605,11 +609,9 @@
         </div>
 
         <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-
           <label for="photoInput" style="font-size:25px;cursor:pointer">📷</label>
 
-          <input id="photoInput" type="file"
-            accept="image/*" hidden>
+          <input id="photoInput" type="file" accept="image/*" hidden>
 
           <input id="messageInput" type="text"
             placeholder="Type a message..."
@@ -620,48 +622,28 @@
 
         <p class="hint">Send messages, emojis and photos with Connecto.</p>
       </div>
-
     </main>
   </section>
 
-  <!-- CALL SCREEN: kept outside chat and login sections -->
+  <!-- CALL SCREEN -->
   <div id="callScreen" class="call-screen hidden">
-
     <h2 id="callTitle">Connecto Call</h2>
     <p id="callStatus" style="margin:15px">Calling...</p>
 
-    <video id="remoteVideo" class="call-video"
-      autoplay playsinline></video>
-
-    <video id="localVideo" class="local-video"
-      autoplay muted playsinline></video>
+    <video id="remoteVideo" class="call-video" autoplay playsinline></video>
+    <video id="localVideo" class="local-video" autoplay muted playsinline></video>
 
     <div class="call-controls">
+      <button id="muteCallBtn" type="button" title="Mute microphone">🎙️</button>
+      <button id="cameraToggleBtn" type="button" title="Turn camera off">📷</button>
+      <button id="flipCameraBtn" type="button" title="Flip camera">🔄</button>
 
-      <button id="muteCallBtn" type="button"
-        title="Mute microphone">🎙️</button>
-        <button id="cameraToggleBtn" type="button"
-  title="Turn camera off">📷</button>
-
-<button id="flipCameraBtn" type="button"
-  title="Flip camera">🔄</button>
-
-      <button id="acceptCallBtn" type="button">
-        📞 Accept
-      </button>
-
-      <button id="declineCallBtn" type="button">
-        ❌ Decline
-      </button>
-
-      <button id="endCallBtn" type="button">
-        ✖ End Call
-      </button>
-
+      <button id="acceptCallBtn" type="button">📞 Accept</button>
+      <button id="declineCallBtn" type="button">❌ Decline</button>
+      <button id="endCallBtn" type="button">✖ End Call</button>
     </div>
   </div>
 
   <script type="module" src="script.js"></script>
-
 </body>
 </html>
