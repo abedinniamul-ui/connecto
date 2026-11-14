@@ -1768,9 +1768,9 @@ function listenForIncomingCalls() {
   if (!currentUser) return;
 
   const callsQuery = query(
-    collection(db, "calls"),
-    where("participants", "array-contains", currentUser.uid)
-  );
+  collection(db, "calls"),
+  where("receiverId", "==", currentUser.uid)
+);
 
   incomingCallUnsub = onSnapshot(
     callsQuery,
@@ -1785,7 +1785,10 @@ function listenForIncomingCalls() {
         const changedCallId = change.doc.id;
 
         if (data.receiverId !== currentUser.uid) continue;
-
+// Do not display calls from blocked contacts.
+if (await isContactBlocked(data.callerId)) {
+  continue;
+}
         // Both users called each other.
         const simultaneousCall =
           isCaller &&
@@ -2201,7 +2204,7 @@ onAuthStateChanged(auth, async user => {
 });
 let recentChats = [];
 let stopRecentChats = null;
-
+let loadRecentChats = null;
 // ---------------- MOBILE CHAT LAYOUT ----------------
 
 (function setupMobileLayout() {
@@ -2361,7 +2364,6 @@ function cleanupRecentChats() {
 }
 
 // ---------------- LOAD RECENT CHATS AFTER LOGIN ----------------
-
 const previousStartAppForRecentChats = startApp;
 
 startApp = async function(user) {
@@ -2369,7 +2371,11 @@ startApp = async function(user) {
 
   if (auth.currentUser?.uid !== user.uid) return;
 
-  listenForRecentChats();
+  if (typeof loadRecentChats === "function") {
+    loadRecentChats();
+  } else {
+    console.error("loadRecentChats is not initialized.");
+  }
 };
 
 // ---------------- CLEANUP ON LOGOUT ----------------
