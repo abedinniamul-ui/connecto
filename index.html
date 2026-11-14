@@ -1,10 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#087b69">
-  <title>Connecto - Emoji Chat</title>
+  <meta name="description" content="Connecto - Chat, share emojis and connect with people.">
+  <title>Connecto - Stay Connected</title>
 
   <style>
     * {
@@ -13,15 +15,41 @@
       padding: 0;
     }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #eaf0ef;
-      color: #20312f;
+    :root {
+      --primary: #087b69;
+      --primary-dark: #066354;
+      --light: #e8f5f1;
+      --background: #eef3f1;
+      --border: #e4ebe8;
+      --text: #20312f;
+      --muted: #84918d;
+      --danger: #dc3545;
     }
 
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    .hidden { display: none !important; }
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* LOGIN AND SIGNUP */
 
     .auth-page {
       min-height: 100vh;
@@ -34,54 +62,62 @@
 
     .auth-card {
       width: 100%;
-      max-width: 390px;
+      max-width: 400px;
       background: white;
       border-radius: 22px;
-      padding: 30px;
-      box-shadow: 0 15px 45px #002b2440;
+      padding: 32px;
+      box-shadow: 0 18px 55px #002b2440;
     }
 
     .brand {
       text-align: center;
-      color: #087b69;
-      font-size: 34px;
+      color: var(--primary);
+      font-size: 36px;
       font-weight: 800;
       margin-bottom: 8px;
+      letter-spacing: -1px;
     }
 
     .tagline {
       text-align: center;
       color: #75817e;
-      margin-bottom: 25px;
+      margin-bottom: 28px;
+      font-size: 14px;
     }
 
     .auth-card h2 {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       text-align: center;
     }
 
     .auth-card input {
       width: 100%;
       padding: 14px;
-      margin-bottom: 12px;
+      margin-bottom: 13px;
       border: 1px solid #dce5e2;
-      border-radius: 10px;
+      border-radius: 11px;
       outline: none;
+      background: #fbfdfc;
     }
 
-    .auth-card input:focus { border-color: #0b927b; }
+    .auth-card input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px #087b6915;
+    }
 
     .primary {
-      background: #087b69;
+      background: var(--primary);
       color: white;
       border: 0;
       padding: 13px 18px;
-      border-radius: 10px;
+      border-radius: 11px;
       font-weight: bold;
+      transition: .2s;
     }
 
-    .primary:hover { background: #066354; }
-    .primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .primary:hover {
+      background: var(--primary-dark);
+    }
 
     .auth-card .primary {
       width: 100%;
@@ -90,7 +126,7 @@
 
     .switch {
       text-align: center;
-      margin-top: 18px;
+      margin-top: 20px;
       font-size: 14px;
       color: #65716e;
     }
@@ -98,57 +134,72 @@
     .switch button {
       border: 0;
       background: none;
-      color: #087b69;
+      color: var(--primary);
       font-weight: bold;
     }
 
     .status {
       font-size: 13px;
       text-align: center;
-      margin-top: 12px;
+      margin-top: 13px;
       color: #c0392b;
       min-height: 18px;
       overflow-wrap: anywhere;
     }
 
+    /* MAIN APP */
+
     .app {
       height: 100vh;
+      height: 100dvh;
       display: flex;
       background: white;
+      overflow: hidden;
     }
 
+    /* SIDEBAR */
+
     .sidebar {
-      width: 340px;
-      max-width: 42%;
-      border-right: 1px solid #e3e9e7;
+      width: 350px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
+      background: white;
+      min-height: 0;
     }
 
     .topbar {
       min-height: 72px;
-      background: #087b69;
+      background: var(--primary);
       color: white;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 0 18px;
+      padding: 0 16px;
     }
 
-    .topbar h2 { font-size: 25px; }
+    .topbar h2 {
+      font-size: 25px;
+    }
 
     .logout {
       border: 1px solid #ffffff70;
       background: transparent;
       color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+    }
+
+    .logout:hover {
+      background: #ffffff20;
     }
 
     .me {
       padding: 15px;
-      border-bottom: 1px solid #edf0ef;
+      border-bottom: 1px solid var(--border);
       color: #53615d;
       font-size: 14px;
       overflow-wrap: anywhere;
@@ -158,41 +209,48 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 8px;
+      gap: 8px;
+      margin-top: 9px;
     }
 
     .my-id-label {
       font-size: 13px;
       font-weight: bold;
-      color: #087b69;
+      color: var(--primary);
       overflow-wrap: anywhere;
     }
 
     .copy-id-btn {
       border: 0;
-      border-radius: 7px;
+      border-radius: 8px;
       padding: 8px 10px;
       font-size: 12px;
       font-weight: bold;
-      background: #087b69;
+      background: var(--primary);
       color: white;
     }
 
-    .search { padding: 12px; }
+    .search {
+      padding: 13px;
+    }
 
     .search input {
       width: 100%;
-      padding: 12px;
-      border: 0;
+      padding: 13px;
+      border: 1px solid transparent;
       background: #f0f4f3;
-      border-radius: 10px;
+      border-radius: 11px;
       outline: none;
     }
 
+    .search input:focus {
+      border-color: var(--primary);
+    }
+
     .user-list {
-      overflow: auto;
+      overflow-y: auto;
       flex: 1;
+      min-height: 0;
     }
 
     .user {
@@ -200,21 +258,24 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 15px;
+      padding: 14px;
       border: 0;
       border-bottom: 1px solid #edf0ef;
       background: white;
       text-align: left;
     }
 
-    .user:hover, .user.active { background: #e8f5f1; }
+    .user:hover,
+    .user.active {
+      background: var(--light);
+    }
 
     .avatar {
-      width: 44px;
-      height: 44px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       background: #d2eee5;
-      color: #087b69;
+      color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -230,37 +291,44 @@
 
     .user-sub {
       font-size: 12px;
-      color: #84908c;
+      color: var(--muted);
       margin-top: 5px;
     }
 
-    .user-entry { border-bottom: 1px solid #edf0ef; }
-    .user-entry .user { border-bottom: 0; }
+    .user-entry {
+      border-bottom: 1px solid #edf0ef;
+    }
 
-    .save-contact-btn, .remove-contact-btn {
+    .user-entry .user {
+      border-bottom: 0;
+    }
+
+    .save-contact-btn,
+    .remove-contact-btn {
       border: 0;
-      border-radius: 7px;
-      padding: 8px 10px;
+      border-radius: 8px;
+      padding: 8px 11px;
       font-size: 12px;
       font-weight: bold;
       margin: 0 10px 10px;
     }
 
     .save-contact-btn {
-      background: #087b69;
+      background: var(--primary);
       color: white;
     }
 
     .save-contact-btn:disabled {
       background: #dcebe5;
-      color: #087b69;
-      cursor: default;
+      color: var(--primary);
     }
 
     .remove-contact-btn {
       background: #fff0f0;
-      color: #c0392b;
+      color: var(--danger);
     }
+
+    /* CHAT AREA */
 
     .main {
       flex: 1;
@@ -268,31 +336,47 @@
       display: flex;
       flex-direction: column;
       background: #f4f8f6;
+      min-height: 0;
     }
 
     .chat-head {
       min-height: 72px;
       background: white;
-      border-bottom: 1px solid #e3e9e7;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 12px 20px;
+      flex-shrink: 0;
     }
 
     .chat-head p {
       font-size: 12px;
-      color: #82908b;
+      color: var(--muted);
       margin-top: 4px;
+    }
+
+    .chat-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-actions button {
+      border: 0;
+      background: var(--light);
+      padding: 10px;
+      border-radius: 50%;
+      font-size: 20px;
     }
 
     .chat-body {
       flex: 1;
-      overflow: auto;
+      overflow-y: auto;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      min-height: 0;
     }
 
     .bubble {
@@ -303,7 +387,7 @@
       align-self: flex-start;
       box-shadow: 0 1px 3px #0000000b;
       overflow-wrap: anywhere;
-      font-size: 27px;
+      font-size: 15px;
     }
 
     .bubble.mine {
@@ -314,7 +398,7 @@
     .empty {
       margin: auto;
       text-align: center;
-      color: #83918c;
+      color: var(--muted);
       padding: 25px;
     }
 
@@ -323,10 +407,13 @@
       margin-bottom: 12px;
     }
 
+    /* MESSAGE COMPOSER */
+
     .composer {
       background: white;
       padding: 14px;
-      border-top: 1px solid #e3e9e7;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .emoji-grid {
@@ -341,13 +428,38 @@
       background: #f0f5f3;
       border-radius: 10px;
       padding: 8px;
-      font-size: 25px;
-      min-width: 43px;
+      font-size: 23px;
+      min-width: 42px;
     }
 
     .emoji:hover {
       background: #d9f3e8;
-      transform: scale(1.08);
+    }
+
+    .message-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      align-items: center;
+    }
+
+    .photo-label {
+      font-size: 25px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    #messageInput {
+      flex: 1;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid #dce5e2;
+      border-radius: 22px;
+      outline: none;
+    }
+
+    #messageInput:focus {
+      border-color: var(--primary);
     }
 
     .hint {
@@ -381,7 +493,8 @@
 
     .call-video {
       width: 90%;
-      max-width: 500px;
+      max-width: 600px;
+      max-height: 65vh;
       background: #263c38;
       border-radius: 15px;
       display: none;
@@ -398,70 +511,210 @@
 
     .call-controls {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       margin-top: 30px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
     .call-controls button {
-      padding: 15px;
+      padding: 14px;
       border: 0;
       border-radius: 50%;
       font-size: 18px;
     }
 
-    #acceptCallBtn { background: #16a05d; color: white; }
-    #declineCallBtn, #endCallBtn { background: #dc3545; color: white; }
-    #muteCallBtn { background: #e8f5f1; color: #102b28; }
+    #acceptCallBtn {
+      background: #16a05d;
+      color: white;
+    }
+
+    #declineCallBtn,
+    #endCallBtn {
+      background: var(--danger);
+      color: white;
+    }
+
+    #muteCallBtn,
+    #cameraToggleBtn,
+    #flipCameraBtn {
+      background: var(--light);
+      color: #102b28;
+    }
+
+    /* TABLET AND MOBILE */
+
+    @media (max-width: 850px) {
+      .sidebar {
+        width: 290px;
+      }
+
+      .topbar h2 {
+        font-size: 21px;
+      }
+
+      .logout {
+        padding: 8px;
+      }
+    }
 
     @media (max-width: 650px) {
+      .app {
+        flex-direction: column;
+      }
+
       .sidebar {
-        width: 115px;
-        max-width: 115px;
+        width: 100%;
+        max-width: 100%;
+        height: 42%;
+        flex: 0 0 42%;
+        border-right: 0;
+        border-bottom: 2px solid var(--border);
       }
 
       .topbar {
-        padding: 10px;
-        flex-direction: column;
-        gap: 8px;
-        justify-content: center;
+        min-height: 55px;
+        padding: 8px 12px;
+        flex-direction: row;
       }
 
-      .topbar h2 { font-size: 17px; }
-      .logout { font-size: 10px; padding: 6px; }
-      .me { font-size: 11px; padding: 10px; }
+      .topbar h2 {
+        font-size: 20px;
+      }
+
+      .logout {
+        font-size: 11px;
+        padding: 7px;
+      }
+
+      .me {
+        padding: 9px 12px;
+        font-size: 12px;
+      }
 
       .my-id-row {
-        flex-direction: column;
-        align-items: flex-start;
+        margin-top: 5px;
       }
 
-      .my-id-label { font-size: 10px; }
-      .copy-id-btn { font-size: 10px; padding: 6px; }
+      .my-id-label {
+        font-size: 11px;
+      }
 
-      .search { padding: 5px; }
-      .search input { font-size: 11px; padding: 9px 5px; }
+      .copy-id-btn {
+        padding: 6px 8px;
+        font-size: 10px;
+      }
+
+      .search {
+        padding: 7px 10px;
+      }
+
+      .search input {
+        padding: 10px;
+        font-size: 13px;
+      }
 
       .user {
-        padding: 12px 5px;
-        flex-direction: column;
-        gap: 5px;
-        text-align: center;
+        padding: 8px 12px;
       }
 
-      .user-name { font-size: 11px; }
-      .user-sub { display: none; }
-      .save-contact-btn, .remove-contact-btn {
-        margin: 0 2px 8px;
-        padding: 6px 3px;
-        font-size: 9px;
+      .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
       }
 
-      .chat-head { padding: 10px; }
-      .chat-body { padding: 10px; }
-      .composer { padding: 8px 4px; }
-      .emoji { font-size: 22px; min-width: 35px; padding: 6px; }
+      .user-name {
+        font-size: 13px;
+      }
+
+      .user-sub {
+        font-size: 10px;
+      }
+
+      .save-contact-btn,
+      .remove-contact-btn {
+        margin: 0 8px 6px;
+        padding: 6px 9px;
+        font-size: 10px;
+      }
+
+      .main {
+        flex: 1;
+        width: 100%;
+        min-height: 0;
+      }
+
+      .chat-head {
+        min-height: 60px;
+        padding: 8px 12px;
+      }
+
+      .chat-head strong {
+        font-size: 14px;
+      }
+
+      .chat-actions button {
+        padding: 8px;
+        font-size: 17px;
+      }
+
+      .chat-body {
+        padding: 12px;
+      }
+
+      .bubble {
+        max-width: 88%;
+      }
+
+      .composer {
+        padding: 8px;
+      }
+
+      .emoji-grid {
+        gap: 4px;
+      }
+
+      .emoji {
+        min-width: 32px;
+        padding: 5px;
+        font-size: 19px;
+      }
+
+      .message-row {
+        margin-top: 8px;
+        gap: 6px;
+      }
+
+      #messageInput {
+        padding: 11px;
+        font-size: 13px;
+      }
+
+      .message-row .primary {
+        padding: 11px 12px;
+        font-size: 12px;
+      }
+
+      .hint {
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .topbar h2 {
+        font-size: 17px;
+      }
+
+      .logout {
+        font-size: 10px;
+        padding: 6px;
+      }
+
+      .emoji {
+        min-width: 29px;
+        font-size: 17px;
+      }
     }
   </style>
 </head>
@@ -469,28 +722,43 @@
 <body>
 
   <!-- LOGIN AND REGISTRATION -->
+
   <section class="auth-page" id="authPage">
     <div class="auth-card">
+
       <div class="brand">Connecto</div>
       <p class="tagline">A little emoji brings us closer.</p>
 
       <div id="loginBox">
         <h2>Welcome back</h2>
 
-        <input id="loginEmail" type="email"
-          placeholder="Email address" autocomplete="email">
+        <input
+          id="loginEmail"
+          type="email"
+          placeholder="Email address"
+          autocomplete="email"
+        >
 
-        <input id="loginPassword" type="password"
-          placeholder="Password" autocomplete="current-password">
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+        >
 
         <p style="text-align:right;margin:0 0 12px">
-          <button id="forgotPassword" type="button"
-            style="border:0;background:none;color:#087b69;cursor:pointer">
+          <button
+            id="forgotPassword"
+            type="button"
+            style="border:0;background:none;color:#087b69"
+          >
             Forgot password?
           </button>
         </p>
 
-        <button class="primary" id="loginBtn">Log in</button>
+        <button class="primary" id="loginBtn" type="button">
+          Log in
+        </button>
 
         <p class="switch">
           New to Connecto?
@@ -501,17 +769,31 @@
       <div id="signupBox" class="hidden">
         <h2>Create your account</h2>
 
-        <input id="signupName" type="text"
-          placeholder="Your username" maxlength="25">
+        <input
+          id="signupName"
+          type="text"
+          placeholder="Your username"
+          maxlength="25"
+          autocomplete="name"
+        >
 
-        <input id="signupEmail" type="email"
-          placeholder="Email address" autocomplete="email">
+        <input
+          id="signupEmail"
+          type="email"
+          placeholder="Email address"
+          autocomplete="email"
+        >
 
-        <input id="signupPassword" type="password"
+        <input
+          id="signupPassword"
+          type="password"
           placeholder="Password (at least 6 characters)"
-          autocomplete="new-password">
+          autocomplete="new-password"
+        >
 
-        <button class="primary" id="signupBtn">Create account</button>
+        <button class="primary" id="signupBtn" type="button">
+          Create account
+        </button>
 
         <p class="switch">
           Already registered?
@@ -524,17 +806,25 @@
   </section>
 
   <!-- CHAT APP -->
+
   <section class="app hidden" id="chatApp">
 
     <aside class="sidebar">
+
       <header class="topbar">
         <h2>Connecto</h2>
 
-        <button id="enableNotificationsBtn" type="button" class="logout">
+        <button
+          id="enableNotificationsBtn"
+          type="button"
+          class="logout"
+        >
           🔔 Notifications
         </button>
 
-        <button class="logout" id="logoutBtn">Log out</button>
+        <button class="logout" id="logoutBtn" type="button">
+          Log out
+        </button>
       </header>
 
       <div class="me">
@@ -545,24 +835,34 @@
             Connecto ID: Loading...
           </span>
 
-          <button class="copy-id-btn" id="copyConnectoIdBtn" type="button">
+          <button
+            class="copy-id-btn"
+            id="copyConnectoIdBtn"
+            type="button"
+          >
             📋 Copy ID
           </button>
         </div>
       </div>
 
       <div class="search">
-        <input id="userSearch" placeholder="Search by Connecto ID">
+        <input
+          id="userSearch"
+          placeholder="Search by Connecto ID"
+          autocomplete="off"
+        >
       </div>
 
       <div class="user-list" id="userList">
         <div class="empty">Loading contacts...</div>
       </div>
+
     </aside>
 
     <main class="main">
 
       <header class="chat-head">
+
         <div class="avatar" id="activeAvatar">C</div>
 
         <div style="flex:1;min-width:0">
@@ -570,29 +870,42 @@
           <p id="activeStatus">Choose someone to chat with</p>
         </div>
 
-        <div style="display:flex;gap:8px">
-          <button id="voiceCallBtn" type="button" title="Voice call"
-            style="border:0;background:#e8f5f1;padding:10px;border-radius:50%;font-size:20px">
+        <div class="chat-actions">
+
+          <button
+            id="voiceCallBtn"
+            type="button"
+            title="Voice call"
+            aria-label="Voice call"
+          >
             📞
           </button>
 
-          <button id="videoCallBtn" type="button" title="Video call"
-            style="border:0;background:#e8f5f1;padding:10px;border-radius:50%;font-size:20px">
+          <button
+            id="videoCallBtn"
+            type="button"
+            title="Video call"
+            aria-label="Video call"
+          >
             📹
           </button>
+
         </div>
+
       </header>
 
       <div class="chat-body" id="chatMessages">
         <div class="empty">
           <div class="big">💬</div>
           <h3>Welcome to Connecto</h3>
-          <p>Choose a person from the left to start chatting.</p>
+          <p>Choose a person to start chatting.</p>
         </div>
       </div>
 
       <div class="composer">
+
         <div class="emoji-grid" id="emojiGrid">
+
           <button class="emoji" type="button">😀</button>
           <button class="emoji" type="button">😂</button>
           <button class="emoji" type="button">🥰</button>
@@ -606,44 +919,116 @@
           <button class="emoji" type="button">👍</button>
           <button class="emoji" type="button">🙏</button>
           <button class="emoji" type="button">🎉</button>
+
         </div>
 
-        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-          <label for="photoInput" style="font-size:25px;cursor:pointer">📷</label>
+        <div class="message-row">
 
-          <input id="photoInput" type="file" accept="image/*" hidden>
+          <label
+            for="photoInput"
+            class="photo-label"
+            title="Choose a photo"
+          >
+            📷
+          </label>
 
-          <input id="messageInput" type="text"
+          <input
+            id="photoInput"
+            type="file"
+            accept="image/*"
+            hidden
+          >
+
+          <input
+            id="messageInput"
+            type="text"
             placeholder="Type a message..."
-            style="flex:1;min-width:0;padding:13px;border:1px solid #dce5e2;border-radius:20px;outline:none">
+            autocomplete="off"
+          >
 
-          <button id="sendBtn" class="primary">Send</button>
+          <button id="sendBtn" class="primary" type="button">
+            Send
+          </button>
+
         </div>
 
-        <p class="hint">Send messages, emojis and photos with Connecto.</p>
+        <p class="hint">
+          Send messages and emojis with Connecto.
+        </p>
+
       </div>
+
     </main>
+
   </section>
 
   <!-- CALL SCREEN -->
-  <div id="callScreen" class="call-screen hidden">
-    <h2 id="callTitle">Connecto Call</h2>
-    <p id="callStatus" style="margin:15px">Calling...</p>
 
-    <video id="remoteVideo" class="call-video" autoplay playsinline></video>
-    <video id="localVideo" class="local-video" autoplay muted playsinline></video>
+  <div id="callScreen" class="call-screen hidden">
+
+    <h2 id="callTitle">Connecto Call</h2>
+
+    <p id="callStatus" style="margin:15px">
+      Calling...
+    </p>
+
+    <video
+      id="remoteVideo"
+      class="call-video"
+      autoplay
+      playsinline
+    ></video>
+
+    <video
+      id="localVideo"
+      class="local-video"
+      autoplay
+      muted
+      playsinline
+    ></video>
 
     <div class="call-controls">
-      <button id="muteCallBtn" type="button" title="Mute microphone">🎙️</button>
-      <button id="cameraToggleBtn" type="button" title="Turn camera off">📷</button>
-      <button id="flipCameraBtn" type="button" title="Flip camera">🔄</button>
 
-      <button id="acceptCallBtn" type="button">📞 Accept</button>
-      <button id="declineCallBtn" type="button">❌ Decline</button>
-      <button id="endCallBtn" type="button">✖ End Call</button>
+      <button
+        id="muteCallBtn"
+        type="button"
+        title="Mute microphone"
+      >
+        🎙️
+      </button>
+
+      <button
+        id="cameraToggleBtn"
+        type="button"
+        title="Turn camera off"
+      >
+        📷
+      </button>
+
+      <button
+        id="flipCameraBtn"
+        type="button"
+        title="Flip camera"
+      >
+        🔄
+      </button>
+
+      <button id="acceptCallBtn" type="button">
+        📞 Accept
+      </button>
+
+      <button id="declineCallBtn" type="button">
+        ❌ Decline
+      </button>
+
+      <button id="endCallBtn" type="button">
+        ✖ End Call
+      </button>
+
     </div>
   </div>
 
   <script type="module" src="script.js"></script>
+
 </body>
 </html>

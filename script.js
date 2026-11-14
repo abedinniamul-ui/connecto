@@ -257,7 +257,6 @@ if ($("copyConnectoIdBtn")) {
     }
   });
 }
-
 // ================= NOTIFICATIONS =================
 
 async function enableNotifications() {
@@ -470,7 +469,6 @@ $("forgotPassword").addEventListener("click", async () => {
     $("forgotPassword").disabled = false;
   }
 });
-
 // ================= PRIVATE SAVED CONTACTS =================
 
 function loadSavedContacts() {
@@ -750,7 +748,8 @@ function renderUsers() {
     list.appendChild(entry);
 
     return;
-  }
+  
+    }
 
   if (!savedContacts.length) {
     list.innerHTML =
@@ -966,6 +965,7 @@ $("messageInput").addEventListener("keydown", event => {
   }
 });
 
+
 document.querySelectorAll(".emoji").forEach(button => {
   button.addEventListener("click", async () => {
     if (!currentUser || !selectedUser) {
@@ -992,74 +992,6 @@ document.querySelectorAll(".emoji").forEach(button => {
       alert("Emoji could not be sent: " + friendlyError(error));
     }
   });
-});
-
-// ================= SEND PHOTO =================
-
-$("photoInput").addEventListener("change", async event => {
-  const file = event.target.files[0];
-
-  if (!file) return;
-
-  if (!currentUser || !selectedUser) {
-    alert("First select a saved contact.");
-    event.target.value = "";
-    return;
-  }
-
-  if (!file.type.startsWith("image/")) {
-    alert("Please select an image file.");
-    event.target.value = "";
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    alert("Photo must be smaller than 5 MB.");
-    event.target.value = "";
-    return;
-  }
-
-  const recipient = selectedUser;
-  const id = chatId(currentUser.uid, recipient.uid);
-
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-
-  const filePath =
-    `chatImages/${id}/${currentUser.uid}_${Date.now()}_${safeName}`;
-
-  $("activeStatus").textContent = "Uploading photo...";
-
-  try {
-    const imageRef = ref(storage, filePath);
-
-    await uploadBytes(imageRef, file, {
-      contentType: file.type
-    });
-
-    const imageUrl = await getDownloadURL(imageRef);
-
-    if (selectedUser?.uid !== recipient.uid) {
-      alert("Photo uploaded, but the selected chat changed.");
-      return;
-    }
-
-    await addDoc(collection(db, "chats", id, "messages"), {
-      imageUrl,
-      senderId: currentUser.uid,
-      createdAt: serverTimestamp()
-    });
-
-    $("activeStatus").textContent = "Photo sent";
-
-  } catch (error) {
-    console.error(error);
-
-    alert("Photo could not be sent: " + friendlyError(error));
-    $("activeStatus").textContent = "Photo upload failed";
-
-  } finally {
-    event.target.value = "";
-  }
 });
 
 // ================= CALL SCREEN =================
@@ -1303,7 +1235,7 @@ function createPeerConnection() {
       setCallStatus("Connected");
     }
 
-    if (connection.iceConnectionState === "failed") {
+        if (connection.iceConnectionState === "failed") {
       console.error(
         "ICE failed. A TURN server may be required."
       );
@@ -1723,7 +1655,6 @@ async function startCall(type) {
     }
 
     $("localVideo").srcObject = localStream;
-
     createPeerConnection();
 
     const callRef = doc(collection(db, "calls"));
@@ -1945,8 +1876,7 @@ function listenForIncomingCalls() {
 
           continue;
         }
-
-        if (
+                if (
           currentCallId === changedCallId &&
           !isCaller &&
           ["ended", "rejected"].includes(data.status)
@@ -2111,21 +2041,14 @@ async function acceptCall() {
         { status: "rejected" }
       );
     } catch (updateError) {
-      console.error(
-        "Could not update rejected call:",
-        updateError
-      );
+      console.error("Could not reject failed call:", updateError);
     }
 
-    cleanupCall();
-
-  } finally {
-    if ($("acceptCallBtn")) {
-      $("acceptCallBtn").disabled = false;
+    if (currentCallId === acceptedCallId) {
+      cleanupCall();
     }
   }
 }
-
 // ================= END / DECLINE CALL =================
 
 async function endCall() {
@@ -2181,7 +2104,6 @@ $("muteCallBtn").addEventListener("click", () => {
   $("muteCallBtn").textContent =
     microphoneMuted ? "🔇" : "🎙️";
 });
-
 // ================= START APP =================
 
 async function startApp(user) {
@@ -2277,14 +2199,6 @@ onAuthStateChanged(auth, async user => {
     showLogin();
   }
 });
-
-// ============================================================
-// CONNECTO UPGRADE
-// Paste this entire block at the VERY BOTTOM of script.js.
-// Existing login, messages, photos, calls and notifications
-// are preserved.
-// ============================================================
-
 let recentChats = [];
 let stopRecentChats = null;
 
@@ -2340,148 +2254,239 @@ let stopRecentChats = null;
         font-size: 13px;
       }
 
-      #chatApp .my-id-row {
-        flex-direction: row;
-        align-items: center;
-      }
-
-      #chatApp .my-id-label {
-        font-size: 12px;
-      }
-
-      #chatApp .search {
-        padding: 12px;
-      }
-
-      #chatApp .search input {
-        font-size: 15px;
-        padding: 12px;
-      }
-
-      #chatApp .user {
-        flex-direction: row;
-        text-align: left;
-        padding: 13px;
-      }
-
-      #chatApp .user-name {
-        font-size: 14px;
-      }
-
-      #chatApp .user-sub {
-        display: block;
-      }
-
-      #chatApp .save-contact-btn,
-      #chatApp .remove-contact-btn {
-        margin: 0 12px 10px 68px;
-        padding: 8px 12px;
-        font-size: 12px;
-      }
-
       #chatApp .main {
         display: none;
         width: 100%;
         height: 100%;
       }
 
-      body.mobile-chat-open #chatApp .sidebar {
+      #chatApp.mobile-chat-open .sidebar {
         display: none;
       }
 
-      body.mobile-chat-open #chatApp .main {
+      #chatApp.mobile-chat-open .main {
         display: flex;
       }
 
-      body.mobile-chat-open #backToContactsBtn {
-        display: block;
-      }
-
-      #chatApp .chat-head {
-        padding: 10px;
-        gap: 8px;
-      }
-
-      #chatApp .chat-body {
-        padding: 12px;
-      }
-
-      #chatApp .bubble {
-        max-width: 88%;
-      }
-
-      #chatApp .composer {
-        padding: 9px;
-      }
-
-      #chatApp .emoji-grid {
-        gap: 4px;
-      }
-
-      #chatApp .emoji {
-        font-size: 20px;
-        min-width: 34px;
-        padding: 5px;
-      }
-
-      #chatApp #messageInput {
-        font-size: 14px;
-      }
-
-      #chatApp #sendBtn {
-        padding: 11px;
-      }
-
-      #callScreen {
-        padding: 12px;
-      }
-
-      #remoteVideo {
-        width: 100%;
-        max-height: 55vh;
-        object-fit: contain;
-      }
-
-      #localVideo {
-        width: 105px;
-        right: 12px;
-        top: 65px;
-      }
-
-      .call-controls {
-        gap: 9px;
-        margin-top: 20px;
-      }
-
-      .call-controls button {
-        padding: 12px;
+      #backToContactsBtn {
+        display: inline-block;
       }
     }
   `;
 
   document.head.appendChild(style);
-
-  // Add a back button without needing to change index.html.
-  const chatHead = document.querySelector("#chatApp .chat-head");
-
-  if (chatHead && !$("backToContactsBtn")) {
-    const backButton = document.createElement("button");
-
-    backButton.id = "backToContactsBtn";
-    backButton.type = "button";
-    backButton.textContent = "← Back";
-
-    backButton.addEventListener("click", () => {
-      document.body.classList.remove("mobile-chat-open");
-    });
-
-    chatHead.insertBefore(backButton, chatHead.firstChild);
-  }
 })();
 
-// ---------------- RECENT CONVERSATIONS ----------------
+// ---------------- BACK TO CONTACTS BUTTON ----------------
 
-async function loadRecentChats() {
+(function setupBackButton() {
+  const header = document.querySelector("#chatApp .chat-header");
+
+  if (!header || $("backToContactsBtn")) return;
+
+  const backButton = document.createElement("button");
+
+  backButton.id = "backToContactsBtn";
+  backButton.type = "button";
+  backButton.textContent = "← Back";
+
+  backButton.addEventListener("click", () => {
+    document.body.classList.remove("mobile-chat-open");
+    $("chatApp").classList.remove("mobile-chat-open");
+  });
+
+  header.prepend(backButton);
+})();
+
+// ---------------- RECENT CHATS ----------------
+
+function listenForRecentChats() {
+  if (!currentUser) return;
+
+  stopRecentChats = stopListener(stopRecentChats);
+
+  const messagesQuery = query(
+    collection(db, "messages"),
+    where("participants", "array-contains", currentUser.uid)
+  );
+
+  stopRecentChats = onSnapshot(
+    messagesQuery,
+    snapshot => {
+      const chatMap = new Map();
+
+      snapshot.forEach(messageDoc => {
+        const message = messageDoc.data();
+
+        const otherUid = message.participants?.find(
+          uid => uid !== currentUser.uid
+        );
+
+        if (!otherUid) return;
+
+        const previous = chatMap.get(otherUid);
+
+        if (
+          !previous ||
+          (message.createdAt?.seconds || 0) >
+          (previous.createdAt?.seconds || 0)
+        ) {
+          chatMap.set(otherUid, {
+            ...message,
+            otherUid
+          });
+        }
+      });
+
+      recentChats = Array.from(chatMap.values()).sort(
+        (a, b) =>
+          (b.createdAt?.seconds || 0) -
+          (a.createdAt?.seconds || 0)
+      );
+
+      renderUsers();
+    },
+    error => {
+      console.error("Recent chats listener:", error);
+    }
+  );
+}
+
+
+// ---------------- CLEANUP RECENT CHATS ----------------
+
+function cleanupRecentChats() {
+  stopRecentChats = stopListener(stopRecentChats);
+  recentChats = [];
+}
+
+// ---------------- LOAD RECENT CHATS AFTER LOGIN ----------------
+
+const previousStartAppForRecentChats = startApp;
+
+startApp = async function(user) {
+  await previousStartAppForRecentChats(user);
+
+  if (auth.currentUser?.uid !== user.uid) return;
+
+  listenForRecentChats();
+};
+
+// ---------------- CLEANUP ON LOGOUT ----------------
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    cleanupRecentChats();
+  }
+});
+
+// ============================================================
+// CONNECTO FIX: LIVE CONTACT SYNC + REMOVE CONTACT + MOBILE UI
+// Paste this complete block at the VERY BOTTOM of script.js
+// ============================================================
+
+// Keep track of live profile listeners.
+const connectoProfileListeners = new Map();
+
+// ---------------- LIVE SAVED CONTACT SYNC ----------------
+
+loadSavedContacts = function () {
+  if (!currentUser) return;
+
+  stopSavedContacts = stopListener(stopSavedContacts);
+
+  const contactsRef = collection(
+    db,
+    "users",
+    currentUser.uid,
+    "contacts"
+  );
+
+  stopSavedContacts = onSnapshot(
+    contactsRef,
+    snapshot => {
+      const contactIds = new Set();
+
+      savedContacts = snapshot.docs.map(contactDoc => {
+        const data = contactDoc.data();
+        const uid = data.uid || contactDoc.id;
+
+        contactIds.add(uid);
+
+        return {
+          uid,
+          userId: uid,
+          displayName: data.displayName || "Connecto user",
+          connectoId: data.connectoId || "",
+          savedAt: data.savedAt || null
+        };
+      });
+
+      // Stop listening to profiles that are no longer saved.
+      for (const [uid, unsubscribe] of connectoProfileListeners) {
+        if (!contactIds.has(uid)) {
+          unsubscribe();
+          connectoProfileListeners.delete(uid);
+        }
+      }
+
+      // Listen for profile changes from each saved contact.
+      for (const person of savedContacts) {
+        if (connectoProfileListeners.has(person.uid)) continue;
+
+        const profileRef = doc(db, "users", person.uid);
+
+        const unsubscribe = onSnapshot(
+          profileRef,
+          profileSnapshot => {
+            if (!profileSnapshot.exists()) return;
+
+            const profile = profileSnapshot.data();
+
+            savedContacts = savedContacts.map(contact => {
+              if (contact.uid !== person.uid) return contact;
+
+              return {
+                ...contact,
+                displayName:
+                  profile.displayName ||
+                  contact.displayName ||
+                  "Connecto user",
+                connectoId:
+                  profile.connectoId ||
+                  contact.connectoId ||
+                  ""
+              };
+            });
+
+            renderUsers();
+          },
+          error => {
+            console.error(
+              "Contact profile sync error:",
+              person.uid,
+              error
+            );
+          }
+        );
+
+        connectoProfileListeners.set(person.uid, unsubscribe);
+      }
+
+      renderUsers();
+    },
+    error => {
+      console.error("Saved contacts sync error:", error);
+
+      $("userList").innerHTML =
+        '<div class="notice">Could not sync contacts. Check your internet connection and Firestore rules.</div>';
+    }
+  );
+};
+
+// ---------------- LIVE RECENT CONVERSATION SYNC ----------------
+
+loadRecentChats = function () {
   if (!currentUser) return;
 
   stopRecentChats = stopListener(stopRecentChats);
@@ -2493,78 +2498,154 @@ async function loadRecentChats() {
 
   stopRecentChats = onSnapshot(
     chatsQuery,
-    async snapshot => {
-      const requestUserId = currentUser?.uid;
+    snapshot => {
+      const myUid = currentUser?.uid;
 
-      if (!requestUserId) return;
+      if (!myUid) return;
 
-      try {
-        const results = await Promise.all(
-          snapshot.docs.map(async chatDoc => {
-            const data = chatDoc.data();
+      recentChats = snapshot.docs
+        .map(chatDoc => {
+          const data = chatDoc.data();
 
-            const otherUid = (data.participants || []).find(
-              uid => uid !== requestUserId
-            );
+          const otherUid = (data.participants || []).find(
+            uid => uid !== myUid
+          );
 
-            if (!otherUid) return null;
+          if (!otherUid) return null;
 
-            // Use direct profile reads, not a public users listing.
-            const profileSnapshot = await getDoc(
-              doc(db, "users", otherUid)
-            );
+          return {
+            uid: otherUid,
+            userId: otherUid,
+            updatedAt: data.updatedAt || null,
+            chatId: chatDoc.id
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+          const timeA = a.updatedAt?.toMillis?.() || 0;
+          const timeB = b.updatedAt?.toMillis?.() || 0;
 
-            if (!profileSnapshot.exists()) return null;
+          return timeB - timeA;
+        });
 
-            const profile = profileSnapshot.data();
-
-            return {
-              uid: otherUid,
-              userId: otherUid,
-              displayName:
-                profile.displayName || "Connecto user",
-              connectoId: profile.connectoId || "",
-              updatedAt: data.updatedAt || null,
-              chatId: chatDoc.id
-            };
-          })
-        );
-
-        if (currentUser?.uid !== requestUserId) return;
-
-        recentChats = results
-          .filter(Boolean)
-          .sort((a, b) => {
-            const timeA = a.updatedAt?.toMillis?.() || 0;
-            const timeB = b.updatedAt?.toMillis?.() || 0;
-
-            return timeB - timeA;
-          });
-
-        renderUsers();
-
-      } catch (error) {
-        console.error("Recent chats error:", error);
-      }
+      renderUsers();
     },
     error => {
-      console.error("Recent chats listener:", error);
+      console.error("Recent conversation sync error:", error);
     }
   );
-}
+};
+
+// ---------------- REMOVE CONTACT ----------------
+
+removeContact = async function (person) {
+  if (!currentUser || !person?.uid) return;
+
+  const confirmed = confirm(
+    `Remove ${person.displayName || "this contact"} from your contacts?\n\nYour existing messages will NOT be deleted.`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteDoc(
+      doc(
+        db,
+        "users",
+        currentUser.uid,
+        "contacts",
+        person.uid
+      )
+    );
+
+    // Keep the conversation and its messages.
+    // Only the saved-contact document is deleted.
+
+    alert(
+      "Contact removed successfully. Your chat history is safe."
+    );
+
+  } catch (error) {
+    console.error("Remove contact error:", error);
+
+    alert(
+      "Could not remove contact: " + friendlyError(error)
+    );
+  }
+};
 
 // ---------------- CONTACT LIST DISPLAY ----------------
 
-// Replace the old display function while keeping its callers.
 renderUsers = function () {
   if (!currentUser) return;
 
   const list = $("userList");
-  const search = $("userSearch").value.trim();
+
+  if (!list) return;
+
+  const search = $("userSearch").value
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, "");
 
   list.innerHTML = "";
 
-  // Search result view.
+  function createContactEntry(person, subtitle, showRemove) {
+    const entry = document.createElement("div");
+    entry.className = "user-entry";
+
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className =
+      "user" +
+      (selectedUser?.uid === person.uid ? " active" : "");
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent =
+      (person.displayName || "?").charAt(0).toUpperCase();
+
+    const details = document.createElement("div");
+    details.className = "contact-details";
+
+    const name = document.createElement("div");
+    name.className = "user-name";
+    name.textContent =
+      person.displayName || "Connecto user";
+
+    const sub = document.createElement("div");
+    sub.className = "user-sub";
+    sub.textContent = subtitle;
+
+    details.append(name, sub);
+    openButton.append(avatar, details);
+
+    openButton.addEventListener("click", () => {
+      openChat(person);
+    });
+
+    entry.appendChild(openButton);
+
+    if (showRemove) {
+      const removeButton = document.createElement("button");
+
+      removeButton.type = "button";
+      removeButton.className = "remove-contact-btn";
+      removeButton.textContent = "Remove";
+      removeButton.title = "Remove saved contact";
+
+      removeButton.addEventListener("click", event => {
+        event.stopPropagation();
+        removeContact(person);
+      });
+
+      entry.appendChild(removeButton);
+    }
+
+    return entry;
+  }
+
+  // Search result.
   if (search) {
     if (!searchResult) {
       list.innerHTML =
@@ -2583,687 +2664,476 @@ renderUsers = function () {
 
     const person = searchResult;
 
-    const isSaved = savedContacts.some(
+    const savedPerson = savedContacts.find(
       contact => contact.uid === person.uid
     );
 
-    const entry = document.createElement("div");
-    entry.className = "user-entry";
+    const displayPerson = savedPerson
+      ? { ...person, ...savedPerson }
+      : person;
 
-    const openButton = document.createElement("button");
-    openButton.type = "button";
-    openButton.className = "user";
+    const entry = createContactEntry(
+      displayPerson,
+      displayPerson.connectoId
+        ? "@" + displayPerson.connectoId
+        : "Connecto user found",
+      false
+    );
 
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.textContent =
-      (person.displayName || "?").charAt(0).toUpperCase();
+    if (savedPerson) {
+      const removeButton = document.createElement("button");
 
-    const details = document.createElement("div");
+      removeButton.type = "button";
+      removeButton.className = "remove-contact-btn";
+      removeButton.textContent = "Remove";
 
-    const name = document.createElement("div");
-    name.className = "user-name";
-    name.textContent = person.displayName || "Connecto user";
+      removeButton.addEventListener("click", () => {
+        removeContact(displayPerson);
+      });
 
-    const sub = document.createElement("div");
-    sub.className = "user-sub";
-    sub.textContent = person.connectoId
-      ? "@" + person.connectoId
-      : "Connecto user";
+      entry.appendChild(removeButton);
+    } else {
+      const saveButton = document.createElement("button");
 
-    details.append(name, sub);
-    openButton.append(avatar, details);
+      saveButton.type = "button";
+      saveButton.className = "save-contact-btn";
+      saveButton.textContent = "＋ Save Contact";
 
-    // Chatting does NOT require saving the contact.
-    openButton.addEventListener("click", () => {
-      openChat(person);
-    });
+      saveButton.addEventListener("click", () => {
+        saveContact(displayPerson);
+      });
 
-    entry.appendChild(openButton);
+      entry.appendChild(saveButton);
+    }
 
-    const saveButton = document.createElement("button");
-    saveButton.type = "button";
-    saveButton.className = "save-contact-btn";
-    saveButton.textContent = isSaved
-      ? "✓ Saved"
-      : "＋ Save Contact";
-    saveButton.disabled = isSaved;
-
-    saveButton.addEventListener("click", () => {
-      saveContact(person);
-    });
-
-    entry.appendChild(saveButton);
     list.appendChild(entry);
-
     return;
   }
 
-  // Recent conversations heading.
+  // Only saved contacts are shown in the inbox.
+  // Removing a contact hides it here but does not delete its chat.
+  const savedIds = new Set(
+    savedContacts.map(person => person.uid)
+  );
+
+  const visibleRecent = recentChats
+    .filter(person => savedIds.has(person.uid))
+    .map(recent => {
+      const saved = savedContacts.find(
+        contact => contact.uid === recent.uid
+      );
+
+      return saved
+        ? { ...recent, ...saved }
+        : recent;
+    });
+
+  const recentIds = new Set(
+    visibleRecent.map(person => person.uid)
+  );
+
+  const otherSaved = savedContacts.filter(
+    person => !recentIds.has(person.uid)
+  );
+
   const recentHeading = document.createElement("div");
-  recentHeading.className = "notice";
-  recentHeading.style.color = "#087b69";
-  recentHeading.style.fontWeight = "bold";
+  recentHeading.className = "connecto-section-heading";
   recentHeading.textContent = "💬 Recent conversations";
 
   list.appendChild(recentHeading);
 
-  const displayedIds = new Set();
-
-  recentChats.forEach(person => {
-    displayedIds.add(person.uid);
-
-    const entry = document.createElement("div");
-    entry.className = "user-entry";
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className =
-      "user" + (selectedUser?.uid === person.uid ? " active" : "");
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.textContent =
-      (person.displayName || "?").charAt(0).toUpperCase();
-
-    const details = document.createElement("div");
-
-    const name = document.createElement("div");
-    name.className = "user-name";
-    name.textContent = person.displayName || "Connecto user";
-
-    const sub = document.createElement("div");
-    sub.className = "user-sub";
-    sub.textContent = "Recent conversation";
-
-    details.append(name, sub);
-    button.append(avatar, details);
-
-    button.addEventListener("click", () => {
-      openChat(person);
+  if (visibleRecent.length) {
+    visibleRecent.forEach(person => {
+      list.appendChild(
+        createContactEntry(
+          person,
+          person.connectoId
+            ? "@" + person.connectoId
+            : "Recent conversation",
+          true
+        )
+      );
     });
+  } else {
+    const emptyRecent = document.createElement("div");
+    emptyRecent.className = "empty";
+    emptyRecent.textContent = "No recent conversations yet.";
+    list.appendChild(emptyRecent);
+  }
 
-    entry.appendChild(button);
-    list.appendChild(entry);
-  });
-
-  // Saved contacts heading.
   const savedHeading = document.createElement("div");
-  savedHeading.className = "notice";
-  savedHeading.style.color = "#087b69";
-  savedHeading.style.fontWeight = "bold";
+  savedHeading.className = "connecto-section-heading";
   savedHeading.textContent = "👥 Saved contacts";
 
   list.appendChild(savedHeading);
 
-  const remainingContacts = savedContacts.filter(
-    person => !displayedIds.has(person.uid)
+  if (otherSaved.length) {
+    otherSaved.forEach(person => {
+      list.appendChild(
+        createContactEntry(
+          person,
+          person.connectoId
+            ? "@" + person.connectoId
+            : "Saved contact",
+          true
+        )
+      );
+    });
+  } else {
+    const emptySaved = document.createElement("div");
+    emptySaved.className = "empty";
+    emptySaved.textContent = savedContacts.length
+      ? "All saved contacts are in Recent conversations."
+      : "No saved contacts. Search using a Connecto ID to add someone.";
+
+    list.appendChild(emptySaved);
+  }
+};
+
+// ---------------- IMPROVED MOBILE UI ----------------
+
+(function connectoMobileUIFix() {
+  const style = document.createElement("style");
+
+  style.textContent = `
+    #chatApp {
+      width: 100%;
+      min-width: 0;
+    }
+
+    #chatApp .sidebar,
+    #chatApp .main {
+      min-width: 0;
+    }
+
+    #chatApp .user-entry {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    #chatApp .user-entry > .user {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #chatApp .contact-details {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    #chatApp .user-name,
+    #chatApp .user-sub {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #chatApp .remove-contact-btn {
+      margin: 0 10px 8px 68px;
+      padding: 8px 12px;
+      min-height: 34px;
+      font-size: 12px;
+    }
+
+    #backToContactsBtn {
+      display: none;
+      flex-shrink: 0;
+      border: 0;
+      border-radius: 9px;
+      padding: 9px 12px;
+      background: #e8f5f1;
+      color: #087b69;
+      font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+      #chatApp {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      #chatApp .sidebar {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        flex: 1;
+        border: 0;
+      }
+
+      #chatApp .topbar {
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 12px;
+        min-height: 60px;
+      }
+
+      #chatApp .topbar h2 {
+        font-size: 21px;
+      }
+
+      #chatApp .logout {
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+
+      #chatApp .me {
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      #chatApp .my-id-row {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      #chatApp .my-id-label {
+        font-size: 12px;
+      }
+
+      #chatApp .search {
+        padding: 10px 12px;
+      }
+
+      #chatApp .search input {
+        width: 100%;
+        font-size: 16px;
+        padding: 12px;
+      }
+
+      #chatApp .user {
+        flex-direction: row;
+        text-align: left;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      #chatApp .user-name {
+        font-size: 14px;
+      }
+
+      #chatApp .user-sub {
+        display: block;
+        font-size: 12px;
+      }
+
+      #chatApp .remove-contact-btn,
+      #chatApp .save-contact-btn {
+        margin: 0 10px 9px 66px;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      #chatApp .main {
+        display: none;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+      }
+
+      body.mobile-chat-open #chatApp .sidebar {
+        display: none;
+      }
+
+      body.mobile-chat-open #chatApp .main {
+        display: flex;
+      }
+
+      body.mobile-chat-open #backToContactsBtn {
+        display: inline-block;
+      }
+
+      #chatApp .chat-head {
+        min-height: 64px;
+        padding: 8px 10px;
+        gap: 8px;
+      }
+
+      #chatApp .chat-head > div {
+        min-width: 0;
+      }
+
+      #chatApp .chat-head strong {
+        overflow-wrap: anywhere;
+      }
+
+      #chatApp .chat-body {
+        min-height: 0;
+        padding: 12px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #chatApp .bubble {
+        max-width: 88%;
+        font-size: 16px;
+      }
+
+      #chatApp .composer {
+        flex-shrink: 0;
+        padding: 8px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+      }
+
+      #chatApp .emoji-grid {
+        justify-content: flex-start;
+        gap: 4px;
+        max-height: 76px;
+        overflow-y: auto;
+      }
+
+      #chatApp .emoji {
+        min-width: 34px;
+        padding: 5px;
+        font-size: 20px;
+      }
+
+      #chatApp #messageInput {
+        min-width: 0;
+        font-size: 16px;
+      }
+
+      #chatApp #sendBtn {
+        padding: 11px 13px;
+        flex-shrink: 0;
+      }
+
+      #callScreen {
+        padding: 12px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+      }
+
+      #remoteVideo {
+        width: 100%;
+        max-height: 55vh;
+        object-fit: contain;
+      }
+
+      #localVideo {
+        width: 100px;
+        right: 12px;
+        top: 65px;
+      }
+
+      .call-controls {
+        gap: 9px;
+        margin-top: 20px;
+      }
+
+      .call-controls button {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #chatApp .topbar h2 {
+        font-size: 18px;
+      }
+
+      #chatApp .logout {
+        font-size: 11px;
+        padding: 7px;
+      }
+
+      #chatApp .chat-head {
+        gap: 5px;
+      }
+
+      #chatApp #voiceCallBtn,
+      #chatApp #videoCallBtn {
+        padding: 8px !important;
+        font-size: 17px !important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+
+  // Add mobile Back button if it does not exist.
+  const chatHead = document.querySelector(
+    "#chatApp .chat-head"
   );
 
-  if (!remainingContacts.length && !recentChats.length) {
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent =
-      "No conversations or saved contacts yet. Search for someone using their Connecto ID.";
-    list.appendChild(empty);
-    return;
-  }
+  if (chatHead && !$("backToContactsBtn")) {
+    const backButton = document.createElement("button");
 
-  remainingContacts.forEach(person => {
-    const entry = document.createElement("div");
-    entry.className = "user-entry";
+    backButton.id = "backToContactsBtn";
+    backButton.type = "button";
+    backButton.textContent = "← Back";
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className =
-      "user" + (selectedUser?.uid === person.uid ? " active" : "");
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.textContent =
-      (person.displayName || "?").charAt(0).toUpperCase();
-
-    const details = document.createElement("div");
-
-    const name = document.createElement("div");
-    name.className = "user-name";
-    name.textContent = person.displayName || "Connecto user";
-
-    const sub = document.createElement("div");
-    sub.className = "user-sub";
-    sub.textContent = person.connectoId
-      ? "@" + person.connectoId
-      : "Saved contact";
-
-    details.append(name, sub);
-    button.append(avatar, details);
-
-    button.addEventListener("click", () => {
-      openChat(person);
+    backButton.addEventListener("click", () => {
+      document.body.classList.remove("mobile-chat-open");
     });
 
-    entry.appendChild(button);
-
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "remove-contact-btn";
-    removeButton.textContent = "Remove";
-
-    removeButton.addEventListener("click", () => {
-      removeContact(person);
-    });
-
-    entry.appendChild(removeButton);
-    list.appendChild(entry);
-  });
-};
-
-// ---------------- OPEN CHAT WITHOUT SAVING ----------------
-
-openChat = async function (person) {
-  if (!currentUser || !person?.uid) return;
-
-  if (person.uid === currentUser.uid) {
-    alert("You cannot chat with yourself.");
-    return;
-  }
-
-  selectedUser = person;
-
-  $("activeName").textContent =
-    person.displayName || "Connecto user";
-
-  $("activeAvatar").textContent =
-    (person.displayName || "?").charAt(0).toUpperCase();
-
-  $("activeStatus").textContent = "Connecting...";
-
-  // On mobile, open the chat screen.
-  document.body.classList.add("mobile-chat-open");
-
-  renderUsers();
-
-  stopMessages = stopListener(stopMessages);
-
-  const id = chatId(currentUser.uid, person.uid);
-  const chatRef = doc(db, "chats", id);
-
-  $("chatMessages").innerHTML =
-    '<div class="empty">Loading messages...</div>';
-
-  try {
-    await setDoc(chatRef, {
-      participants: [currentUser.uid, person.uid].sort(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    if (selectedUser?.uid !== person.uid) return;
-
-    $("activeStatus").textContent =
-      person.connectoId
-        ? "@" + person.connectoId
-        : "Connecto user";
-
-    const messagesQuery = query(
-      collection(db, "chats", id, "messages"),
-      orderBy("createdAt", "asc")
+    chatHead.insertBefore(
+      backButton,
+      chatHead.firstChild
     );
-
-    stopMessages = onSnapshot(
-      messagesQuery,
-      snapshot => {
-        if (selectedUser?.uid !== person.uid) return;
-
-        const box = $("chatMessages");
-        box.innerHTML = "";
-
-        if (snapshot.empty) {
-          box.innerHTML =
-            '<div class="empty"><div class="big">👋</div><p>Start your conversation!</p></div>';
-        } else {
-          snapshot.forEach(messageDoc => {
-            renderMessage(messageDoc.data());
-          });
-        }
-
-        box.scrollTop = box.scrollHeight;
-
-        // Refresh the conversation timestamp.
-        // This keeps the inbox ordered by recent activity.
-        updateDoc(chatRef, {
-          updatedAt: serverTimestamp()
-        }).catch(error => {
-          console.warn("Chat timestamp update:", error);
-        });
-      },
-      error => {
-        console.error("Message listener:", error);
-
-        $("activeStatus").textContent =
-          "Message access error. Check Firestore rules.";
-      }
-    );
-
-  } catch (error) {
-    console.error("Open chat error:", error);
-
-    $("activeStatus").textContent =
-      "Could not open chat: " + friendlyError(error);
   }
-};
+})();
 
-// ---------------- REMOVE CONTACT WITHOUT DELETING CHAT ----------------
-
-removeContact = async function (person) {
-  if (!currentUser || !person?.uid) return;
-
-  if (!confirm(
-    `Remove ${person.displayName || "this contact"} from your saved contacts?`
-  )) return;
-
-  try {
-    await deleteDoc(doc(
-      db,
-      "users",
-      currentUser.uid,
-      "contacts",
-      person.uid
-    ));
-
-    // Removing a saved contact does not delete the conversation.
-    alert("Contact removed. Your conversation remains available.");
-
-  } catch (error) {
-    console.error("Remove contact error:", error);
-    alert("Could not remove contact: " + friendlyError(error));
-  }
-};
-
-// ---------------- START APP WITH INBOX ----------------
-
-// Keep the original setup and add the recent conversation listener.
-startApp = async function (user) {
-  currentUser = user;
-
-  $("authPage").classList.add("hidden");
-  $("chatApp").classList.remove("hidden");
-
-  document.body.classList.remove("mobile-chat-open");
-
-  $("myName").textContent =
-    user.displayName ||
-    user.email?.split("@")[0] ||
-    "Connecto user";
-
-  $("myConnectoId").textContent =
-    "Connecto ID: Loading...";
-
-  try {
-    myConnectoId = await ensureConnectoId(user);
-
-    if (auth.currentUser?.uid !== user.uid) return;
-
-    $("myConnectoId").textContent =
-      "Connecto ID: @" + myConnectoId;
-
-    loadSavedContacts();
-    loadRecentChats();
-    listenForIncomingCalls();
-
-  } catch (error) {
-    console.error("Profile setup error:", error);
-
-    $("userList").innerHTML =
-      '<div class="notice">Could not set up Connecto. Check Firebase rules and internet.</div>';
-  }
-};
-
-// ---------------- CLEAN UP INBOX ON LOGOUT ----------------
+// ---------------- CLEAN UP CONTACT LISTENERS ON LOGOUT ----------------
 
 onAuthStateChanged(auth, user => {
   if (!user) {
+    for (const unsubscribe of connectoProfileListeners.values()) {
+      unsubscribe();
+    }
+
+    connectoProfileListeners.clear();
+
     stopRecentChats = stopListener(stopRecentChats);
+
     recentChats = [];
 
     document.body.classList.remove("mobile-chat-open");
   }
 });
 
-console.log("Connecto upgrade loaded successfully.");
-
-// ============================================================
-// CONNECTO CALL TIMER + SINGLE CALL BUTTON + CONTACT REMOVAL
-// ============================================================
-
-let connectoCallTimerInterval = null;
-let connectoCallStartedAt = null;
-
-// ---------- CALL TIMER UI ----------
-
-(function setupCallTimer() {
-  const callScreen = $("callScreen");
-  const callStatus = $("callStatus");
-
-  if (!callScreen || !callStatus) return;
-
-  let timer = $("callDurationTimer");
-
-  if (!timer) {
-    timer = document.createElement("div");
-    timer.id = "callDurationTimer";
-    timer.textContent = "00:00";
-
-    callStatus.insertAdjacentElement("afterend", timer);
-  }
-
-  const style = document.createElement("style");
-
-  style.textContent = `
-    #callDurationTimer {
-      display: none;
-      margin: 9px auto;
-      text-align: center;
-      font-size: 25px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #087b69;
-      font-variant-numeric: tabular-nums;
-    }
-
-    #endCallBtn {
-      background: #d93025 !important;
-      color: white !important;
-      border: none !important;
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #declineCallBtn {
-      display: none !important;
-    }
-
-    #remove-contact-upgrade-btn {
-      background: #fff0f0;
-      color: #c0392b;
-      border: 1px solid #f1caca;
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin: 0 8px 10px 68px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    #remove-contact-upgrade-btn:hover {
-      background: #ffe0e0;
-    }
-  `;
-
-  document.head.appendChild(style);
-
-  // One visible call action button.
-  $("declineCallBtn").style.display = "none";
-  $("endCallBtn").style.display = "inline-block";
-  $("endCallBtn").textContent = "End Call";
-})();
-
-// ---------- CALL BUTTON LABEL ----------
-
-function updateCallActionButton(label) {
-  const button = $("endCallBtn");
-
-  if (!button) return;
-
-  button.textContent = label;
-  button.style.display = "inline-block";
-
-  // Always hide the second button.
-  if ($("declineCallBtn")) {
-    $("declineCallBtn").style.display = "none";
-  }
-}
-
-// Preserve the original call screen function.
-const originalShowCallScreen = showCallScreen;
-
-showCallScreen = function(title, status) {
-  originalShowCallScreen(title, status);
-
-  const incoming = (title || "").startsWith("Incoming");
-
-  updateCallActionButton(
-    incoming ? "Decline" : "End Call"
-  );
-
-  const timer = $("callDurationTimer");
-
-  if (timer) {
-    timer.style.display = "none";
-    timer.textContent = "00:00";
-  }
-};
-
-// ---------- TIMER FUNCTIONS ----------
-
-function startConnectoCallTimer() {
-  if (connectoCallTimerInterval) return;
-
-  connectoCallStartedAt = Date.now();
-
-  const timer = $("callDurationTimer");
-
-  if (!timer) return;
-
-  timer.style.display = "block";
-
-  function updateTimer() {
-    if (!connectoCallStartedAt) return;
-
-    const seconds = Math.floor(
-      (Date.now() - connectoCallStartedAt) / 1000
-    );
-
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-
-    timer.textContent =
-      String(minutes).padStart(2, "0") +
-      ":" +
-      String(remainingSeconds).padStart(2, "0");
-  }
-
-  updateTimer();
-
-  connectoCallTimerInterval = setInterval(
-    updateTimer,
-    1000
-  );
-}
-
-function stopConnectoCallTimer() {
-  if (connectoCallTimerInterval) {
-    clearInterval(connectoCallTimerInterval);
-    connectoCallTimerInterval = null;
-  }
-
-  connectoCallStartedAt = null;
-
-  const timer = $("callDurationTimer");
-
-  if (timer) {
-    timer.textContent = "00:00";
-    timer.style.display = "none";
-  }
-}
-
-// ---------- DETECT REAL CALL CONNECTION ----------
-
-// Preserve the original WebRTC connection handlers.
-const originalCreatePeerConnection = createPeerConnection;
-
-createPeerConnection = function() {
-  const connection = originalCreatePeerConnection();
-
-  const originalConnectionHandler =
-    connection.onconnectionstatechange;
-
-  connection.onconnectionstatechange = function(event) {
-    if (originalConnectionHandler) {
-      originalConnectionHandler.call(connection, event);
-    }
-
-    if (connection !== peerConnection) return;
-
-    if (connection.connectionState === "connected") {
-      startConnectoCallTimer();
-      setCallStatus("Connected");
-      updateCallActionButton("End Call");
-    }
-  };
-
-  return connection;
-};
-
-// ---------- INCOMING CALL BUTTON ----------
-
-// When the incoming call is accepted, the action becomes End Call.
-const originalAcceptCall = acceptCall;
-
-acceptCall = async function() {
-  updateCallActionButton("End Call");
-  return originalAcceptCall();
-};
-
-// ---------- CLEAN UP TIMER ----------
-
-const originalCleanupCall = cleanupCall;
-
-cleanupCall = function() {
-  stopConnectoCallTimer();
-  originalCleanupCall();
-
-  updateCallActionButton("End Call");
-};
-
-// ---------- ONE BUTTON FOR DECLINE AND END ----------
-
-// Existing endCall() already handles both cases:
-// incoming unanswered call = rejected
-// outgoing or accepted call = ended
-// Therefore the same button can handle both.
-$("endCallBtn").onclick = endCall;
-
-$("declineCallBtn").style.display = "none";
-
-// ---------- REMOVE CONTACT FROM RECENT CONVERSATIONS ----------
-
-// The previous renderer puts recent conversations first.
-// Add a Remove button to recent entries when they are saved contacts.
-const originalRenderUsersForRemoval = renderUsers;
-
-renderUsers = function() {
-  originalRenderUsersForRemoval();
-
-  if (!currentUser) return;
-
-  const list = $("userList");
-  const search = $("userSearch").value.trim();
-
-  // Search result: show Remove if already saved.
-  if (search && searchResult && !searchResult.isSelf) {
-    const isSaved = savedContacts.some(
-      person => person.uid === searchResult.uid
-    );
-
-    if (isSaved) {
-      const entry = list.querySelector(".user-entry");
-
-      if (entry && !entry.querySelector(".remove-contact-btn")) {
-        const removeButton = document.createElement("button");
-
-        removeButton.type = "button";
-        removeButton.className = "remove-contact-btn";
-        removeButton.textContent = "Remove";
-
-        removeButton.addEventListener("click", () => {
-          removeContact(searchResult);
-        });
-
-        entry.appendChild(removeButton);
-      }
-    }
-
-    return;
-  }
-
-  // Recent conversations are rendered before saved contacts.
-  const entries = list.querySelectorAll(".user-entry");
-
-  recentChats.forEach((person, index) => {
-    const isSaved = savedContacts.some(
-      contact => contact.uid === person.uid
-    );
-
-    if (!isSaved) return;
-
-    const entry = entries[index];
-
-    if (!entry || entry.querySelector(".remove-contact-btn")) {
-      return;
-    }
-
-    const removeButton = document.createElement("button");
-
-    removeButton.type = "button";
-    removeButton.className = "remove-contact-btn";
-    removeButton.textContent = "Remove";
-
-    removeButton.addEventListener("click", () => {
-      removeContact(person);
-    });
-
-    entry.appendChild(removeButton);
-  });
-};
-
 console.log(
-  "Connecto: single call button, call timer and contact removal enabled."
+  "Connecto contact sync, removal and mobile UI fixes loaded."
 );
 
-// ============================================================
-// CONNECTO: REMOVE, BLOCK AND UNBLOCK CONTACTS
-// Add this block at the VERY BOTTOM of script.js.
-// ============================================================
+/* =========================================================
+   CONNECTO BLOCK / UNBLOCK FEATURE
+   Compatible with the current Connecto script.
+========================================================= */
 
 let blockedContacts = [];
 let blockedIds = new Set();
 let stopBlockedContacts = null;
 
-let searchBlockStatus = {
-  checkedUid: null,
-  blockedByMe: false,
-  blockedByThem: false,
-  checking: false
-};
 
-// ---------------- BLOCK STATUS ----------------
-
-async function getBlockStatus(otherUid) {
-  if (!currentUser || !otherUid || otherUid === currentUser.uid) {
-    return {
-      blockedByMe: false,
-      blockedByThem: false
-    };
+// Check whether either user has blocked the other.
+async function isContactBlocked(uid) {
+  if (!currentUser || !uid || uid === currentUser.uid) {
+    return false;
   }
 
   const myBlockRef = doc(
-    db, "users", currentUser.uid, "blocked", otherUid
+    db,
+    "users",
+    currentUser.uid,
+    "blocked",
+    uid
   );
 
   const theirBlockRef = doc(
-    db, "users", otherUid, "blocked", currentUser.uid
+    db,
+    "users",
+    uid,
+    "blocked",
+    currentUser.uid
   );
 
   const [myBlock, theirBlock] = await Promise.all([
@@ -3271,20 +3141,10 @@ async function getBlockStatus(otherUid) {
     getDoc(theirBlockRef)
   ]);
 
-  return {
-    blockedByMe: myBlock.exists(),
-    blockedByThem: theirBlock.exists()
-  };
+  return myBlock.exists() || theirBlock.exists();
 }
 
-async function canInteractWith(otherUid) {
-  const status = await getBlockStatus(otherUid);
-
-  return !status.blockedByMe && !status.blockedByThem;
-}
-
-// ---------------- LOAD BLOCKED CONTACTS ----------------
-
+// Load your blocked contacts in real time.
 function loadBlockedContacts() {
   if (!currentUser) return;
 
@@ -3300,9 +3160,8 @@ function loadBlockedContacts() {
   stopBlockedContacts = onSnapshot(
     blockedRef,
     async snapshot => {
-      const requestUid = currentUser?.uid;
-
-      if (!requestUid) return;
+      const uid = currentUser?.uid;
+      if (!uid) return;
 
       const results = await Promise.all(
         snapshot.docs.map(async item => {
@@ -3319,16 +3178,14 @@ function loadBlockedContacts() {
 
             return {
               uid: blockedUid,
-              userId: blockedUid,
               displayName: data.displayName || "Connecto user",
               connectoId: data.connectoId || ""
             };
           } catch (error) {
-            console.warn("Blocked profile lookup:", error);
+            console.error("Blocked profile error:", error);
 
             return {
               uid: blockedUid,
-              userId: blockedUid,
               displayName: "Connecto user",
               connectoId: ""
             };
@@ -3336,12 +3193,10 @@ function loadBlockedContacts() {
         })
       );
 
-      if (currentUser?.uid !== requestUid) return;
+      if (currentUser?.uid !== uid) return;
 
       blockedContacts = results;
-      blockedIds = new Set(
-        results.map(person => person.uid)
-      );
+      blockedIds = new Set(results.map(person => person.uid));
 
       renderUsers();
     },
@@ -3352,28 +3207,33 @@ function loadBlockedContacts() {
   );
 }
 
-// ---------------- BLOCK A CONTACT ----------------
-
+// Block a person.
 async function blockContact(person) {
   if (!currentUser || !person?.uid) return;
 
-  if (person.uid === currentUser.uid) return;
+  if (person.uid === currentUser.uid) {
+    alert("You cannot block yourself.");
+    return;
+  }
 
   if (blockedIds.has(person.uid)) {
-    alert("This contact is already blocked.");
+    alert("This person is already blocked.");
     return;
   }
 
   const confirmed = confirm(
-    `Block ${person.displayName || "this contact"}?\n\n` +
-    "They will not be able to send you Connecto messages or call you."
+    `Block ${person.displayName || "this person"}?\n\n` +
+    "They will not be able to message or call you."
   );
 
   if (!confirmed) return;
 
   try {
-    // End an active call with this person before creating the block.
-    if (activeCallPeerId === person.uid && currentCallId) {
+    // End an active call with this person.
+    if (
+      activeCallPeerId === person.uid &&
+      currentCallId
+    ) {
       await endCall();
     }
 
@@ -3385,7 +3245,7 @@ async function blockContact(person) {
       }
     );
 
-    // Close this person's chat if it is open.
+    // Close their chat if it is currently open.
     if (selectedUser?.uid === person.uid) {
       selectedUser = null;
       stopMessages = stopListener(stopMessages);
@@ -3401,23 +3261,20 @@ async function blockContact(person) {
     }
 
     alert("Contact blocked successfully.");
-
     renderUsers();
 
   } catch (error) {
-    console.error("Block contact error:", error);
-
+    console.error("Block error:", error);
     alert("Could not block contact: " + friendlyError(error));
   }
 }
 
-// ---------------- UNBLOCK A CONTACT ----------------
-
+// Unblock a person.
 async function unblockContact(person) {
   if (!currentUser || !person?.uid) return;
 
   if (!confirm(
-    `Unblock ${person.displayName || "this contact"}?`
+    `Unblock ${person.displayName || "this person"}?`
   )) return;
 
   try {
@@ -3425,22 +3282,17 @@ async function unblockContact(person) {
       doc(db, "users", currentUser.uid, "blocked", person.uid)
     );
 
-    alert(
-      "Contact unblocked. You can search for and save this person again."
-    );
-
+    alert("Contact unblocked successfully.");
     renderUsers();
 
   } catch (error) {
-    console.error("Unblock contact error:", error);
-
+    console.error("Unblock error:", error);
     alert("Could not unblock contact: " + friendlyError(error));
   }
 }
 
-// ---------------- CONTACT LIST STYLING ----------------
-
-(function addBlockStyles() {
+// Block / Unblock button styles.
+(function addBlockButtonStyles() {
   const style = document.createElement("style");
 
   style.textContent = `
@@ -3449,8 +3301,8 @@ async function unblockContact(person) {
       color: #c0392b;
       border: 1px solid #efcccc;
       border-radius: 8px;
-      padding: 8px 11px;
-      margin: 0 8px 10px 8px;
+      padding: 8px 12px;
+      margin: 0 8px 10px 68px;
       cursor: pointer;
       font-size: 12px;
       font-weight: bold;
@@ -3465,24 +3317,24 @@ async function unblockContact(person) {
       color: #087b69;
       border: 1px solid #b9ded2;
       border-radius: 8px;
-      padding: 8px 11px;
+      padding: 8px 12px;
       margin: 0 8px 10px 68px;
       cursor: pointer;
       font-size: 12px;
       font-weight: bold;
     }
 
-    .connecto-blocked-note {
-      color: #c0392b;
-      font-size: 12px;
-      padding: 8px 12px;
+    .connecto-section-heading {
+      padding: 12px;
+      margin-top: 8px;
+      color: #087b69;
+      font-size: 13px;
+      font-weight: bold;
     }
 
-    .connecto-section-heading {
-      color: #087b69;
-      font-weight: bold;
-      padding: 12px;
-      margin-top: 5px;
+    .connecto-blocked-note {
+      padding: 10px 12px;
+      color: #c0392b;
       font-size: 13px;
     }
   `;
@@ -3490,116 +3342,32 @@ async function unblockContact(person) {
   document.head.appendChild(style);
 })();
 
-// ---------------- CREATE CONTACT ENTRY ----------------
-
-function makeConnectoEntry(person, options = {}) {
-  const entry = document.createElement("div");
-  entry.className = "user-entry";
-
-  const openButton = document.createElement("button");
-  openButton.type = "button";
-  openButton.className = "user";
-
-  const avatar = document.createElement("div");
-  avatar.className = "avatar";
-  avatar.textContent =
-    (person.displayName || "?").charAt(0).toUpperCase();
-
-  const details = document.createElement("div");
-
-  const name = document.createElement("div");
-  name.className = "user-name";
-  name.textContent = person.displayName || "Connecto user";
-
-  const sub = document.createElement("div");
-  sub.className = "user-sub";
-  sub.textContent = options.subtitle || person.connectoId
-    ? (options.subtitle || "@" + person.connectoId)
-    : "Connecto user";
-
-  details.append(name, sub);
-  openButton.append(avatar, details);
-
-  openButton.addEventListener("click", async () => {
-    if (options.blocked) return;
-
-    try {
-      if (!await canInteractWith(person.uid)) {
-        alert("You cannot open this chat because one of you has blocked the other.");
-        return;
-      }
-
-      openChat(person);
-    } catch (error) {
-      console.error(error);
-      alert("Could not check block status: " + friendlyError(error));
-    }
-  });
-
-  entry.appendChild(openButton);
-
-  if (options.saved && !options.blocked) {
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "remove-contact-btn";
-    removeButton.textContent = "Remove";
-
-    removeButton.addEventListener("click", () => {
-      removeContact(person);
-    });
-
-    entry.appendChild(removeButton);
-  }
-
-  if (!options.blocked) {
-    const blockButton = document.createElement("button");
-    blockButton.type = "button";
-    blockButton.className = "connecto-block-btn";
-    blockButton.textContent = "Block";
-
-    blockButton.addEventListener("click", () => {
-      blockContact(person);
-    });
-
-    entry.appendChild(blockButton);
-  }
-
-  return entry;
-}
-
-// ---------------- UPDATED CONTACT DISPLAY ----------------
+// Add block/unblock buttons to the existing contact list.
+const connectoOriginalRenderUsers = renderUsers;
 
 renderUsers = function() {
-  if (!currentUser || !$("userList")) return;
+  connectoOriginalRenderUsers();
+
+  if (!currentUser) return;
 
   const list = $("userList");
   const search = $("userSearch").value.trim();
 
-  list.innerHTML = "";
-
-  // Search result
-  if (search) {
-    if (!searchResult) {
-      list.innerHTML =
-        '<div class="empty">Enter a complete Connecto ID to search.</div>';
-      return;
-    }
-
+  // Search result.
+  if (search && searchResult && !searchResult.isSelf) {
     const person = searchResult;
+    const entry = list.querySelector(".user-entry");
 
-    if (person.isSelf || person.uid === currentUser.uid) {
-      list.innerHTML =
-        '<div class="empty">This is your own Connecto ID.</div>';
-      return;
-    }
+    if (!entry) return;
+
+    // Remove old block controls before adding fresh ones.
+    entry.querySelectorAll(
+      ".connecto-block-btn, .connecto-unblock-btn"
+    ).forEach(button => button.remove());
 
     if (blockedIds.has(person.uid)) {
-      const entry = makeConnectoEntry(person, {
-        blocked: true,
-        subtitle: "You blocked this contact"
-      });
-
       const unblockButton = document.createElement("button");
+      unblockButton.type = "button";
       unblockButton.className = "connecto-unblock-btn";
       unblockButton.textContent = "Unblock";
 
@@ -3608,144 +3376,86 @@ renderUsers = function() {
       });
 
       entry.appendChild(unblockButton);
-      list.appendChild(entry);
-      return;
-    }
+    } else {
+      const blockButton = document.createElement("button");
+      blockButton.type = "button";
+      blockButton.className = "connecto-block-btn";
+      blockButton.textContent = "Block";
 
-    const loading = document.createElement("div");
-    loading.className = "empty";
-    loading.textContent = "Checking contact status...";
-    list.appendChild(loading);
-
-    const searchedUid = person.uid;
-
-    getBlockStatus(searchedUid).then(status => {
-      if (
-        currentUser?.uid == null ||
-        $("userSearch").value.trim() !== search ||
-        searchResult?.uid !== searchedUid
-      ) return;
-
-      list.innerHTML = "";
-
-      if (status.blockedByMe) {
-        const entry = makeConnectoEntry(person, {
-          blocked: true,
-          subtitle: "You blocked this contact"
-        });
-
-        const unblockButton = document.createElement("button");
-        unblockButton.className = "connecto-unblock-btn";
-        unblockButton.textContent = "Unblock";
-
-        unblockButton.addEventListener("click", () => {
-          unblockContact(person);
-        });
-
-        entry.appendChild(unblockButton);
-        list.appendChild(entry);
-        return;
-      }
-
-      if (status.blockedByThem) {
-        const entry = document.createElement("div");
-        entry.className = "user-entry";
-
-        const note = document.createElement("div");
-        note.className = "connecto-blocked-note";
-        note.textContent =
-          "This user is unavailable for Connecto messaging and calls.";
-
-        entry.appendChild(note);
-        list.appendChild(entry);
-        return;
-      }
-
-      const isSaved = savedContacts.some(
-        contact => contact.uid === person.uid
-      );
-
-      const entry = makeConnectoEntry(person, {
-        saved,
-        subtitle: isSaved
-          ? "Saved contact"
-          : "Connecto user found"
+      blockButton.addEventListener("click", () => {
+        blockContact(person);
       });
 
-      if (!isSaved) {
-        const saveButton = document.createElement("button");
-        saveButton.type = "button";
-        saveButton.className = "save-contact-btn";
-        saveButton.textContent = "＋ Save Contact";
-
-        saveButton.addEventListener("click", () => {
-          saveContact(person);
-        });
-
-        entry.appendChild(saveButton);
-      }
-
-      list.appendChild(entry);
-
-    }).catch(error => {
-      console.error("Search block check:", error);
-
-      list.innerHTML =
-        '<div class="notice">Could not check contact status. Try again.</div>';
-    });
+      entry.appendChild(blockButton);
+    }
 
     return;
   }
 
-  // Recent conversations: show only saved and unblocked contacts.
+  // Recent conversations are rendered before saved contacts.
   const visibleRecent = recentChats.filter(person =>
-    savedContacts.some(contact => contact.uid === person.uid) &&
-    !blockedIds.has(person.uid)
+    savedContacts.some(contact => contact.uid === person.uid)
   );
 
-  const visibleSaved = savedContacts.filter(person =>
-    !blockedIds.has(person.uid) &&
-    !visibleRecent.some(recent => recent.uid === person.uid)
+  const recentIds = new Set(
+    visibleRecent.map(person => person.uid)
   );
 
-  const recentHeading = document.createElement("div");
-  recentHeading.className = "connecto-section-heading";
-  recentHeading.textContent = "💬 Recent conversations";
-  list.appendChild(recentHeading);
+  const visibleSaved = savedContacts.filter(
+    person => !recentIds.has(person.uid)
+  );
 
-  visibleRecent.forEach(person => {
-    list.appendChild(makeConnectoEntry(person, {
-      saved: true,
-      subtitle: "Recent conversation"
-    }));
+  const peopleToDisplay = [
+    ...visibleRecent,
+    ...visibleSaved
+  ];
+
+  const entries = list.querySelectorAll(".user-entry");
+
+  peopleToDisplay.forEach((person, index) => {
+    const entry = entries[index];
+    if (!entry) return;
+
+    entry.querySelectorAll(
+      ".connecto-block-btn, .connecto-unblock-btn"
+    ).forEach(button => button.remove());
+
+    if (blockedIds.has(person.uid)) {
+      entry.style.opacity = "0.65";
+
+      const blockButton = document.createElement("button");
+      blockButton.type = "button";
+      blockButton.className = "connecto-unblock-btn";
+      blockButton.textContent = "Unblock";
+
+      blockButton.addEventListener("click", () => {
+        unblockContact(person);
+      });
+
+      entry.appendChild(blockButton);
+    } else {
+      entry.style.opacity = "1";
+
+      const blockButton = document.createElement("button");
+      blockButton.type = "button";
+      blockButton.className = "connecto-block-btn";
+      blockButton.textContent = "Block";
+
+      blockButton.addEventListener("click", () => {
+        blockContact(person);
+      });
+
+      entry.appendChild(blockButton);
+    }
   });
 
-  const savedHeading = document.createElement("div");
-  savedHeading.className = "connecto-section-heading";
-  savedHeading.textContent = "👥 Saved contacts";
-  list.appendChild(savedHeading);
-
-  visibleSaved.forEach(person => {
-    list.appendChild(makeConnectoEntry(person, {
-      saved: true
-    }));
-  });
-
-  if (!visibleRecent.length && !visibleSaved.length) {
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent =
-      "No visible contacts yet. Search using a Connecto ID to find someone.";
-    list.appendChild(empty);
-  }
-
-  // Blocked contacts section
-  const blockedHeading = document.createElement("div");
-  blockedHeading.className = "connecto-section-heading";
-  blockedHeading.textContent =
+  // Blocked contacts section.
+  const heading = document.createElement("div");
+  heading.className = "connecto-section-heading";
+  heading.textContent =
     `🚫 Blocked contacts (${blockedContacts.length})`;
 
-  list.appendChild(blockedHeading);
+  list.appendChild(heading);
 
   if (!blockedContacts.length) {
     const empty = document.createElement("div");
@@ -3762,181 +3472,98 @@ renderUsers = function() {
     info.className = "connecto-blocked-note";
     info.textContent = person.displayName;
 
-    entry.appendChild(info);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "connecto-unblock-btn";
+    button.textContent = "Unblock";
 
-    const unblockButton = document.createElement("button");
-    unblockButton.type = "button";
-    unblockButton.className = "connecto-unblock-btn";
-    unblockButton.textContent = "Unblock";
-
-    unblockButton.addEventListener("click", () => {
+    button.addEventListener("click", () => {
       unblockContact(person);
     });
 
-    entry.appendChild(unblockButton);
+    entry.append(info, button);
     list.appendChild(entry);
   });
 };
 
-// ---------------- PREVENT SAVING BLOCKED CONTACTS ----------------
-
-const previousSaveContact = saveContact;
-
-saveContact = async function(person) {
-  if (!currentUser || !person?.uid) return;
-
-  try {
-    const allowed = await canInteractWith(person.uid);
-
-    if (!allowed) {
-      alert("You cannot save this contact because one of you has blocked the other.");
-      return;
-    }
-
-    return previousSaveContact(person);
-
-  } catch (error) {
-    console.error("Save block check:", error);
-    alert("Could not check block status: " + friendlyError(error));
-  }
-};
-
-// ---------------- PREVENT OPENING BLOCKED CHATS ----------------
-
-const previousOpenChat = openChat;
+// Prevent opening chats with people YOU have blocked.
+const connectoOriginalOpenChat = openChat;
 
 openChat = async function(person) {
   if (!currentUser || !person?.uid) return;
 
   try {
-    const allowed = await canInteractWith(person.uid);
-
-    if (!allowed) {
-      alert("Messaging is unavailable because one of you has blocked the other.");
+    if (await isContactBlocked(person.uid)) {
+      alert("Unblock this contact before opening the chat.");
       return;
     }
 
-    return previousOpenChat(person);
-
+    return connectoOriginalOpenChat(person);
   } catch (error) {
-    console.error("Open chat block check:", error);
+    console.error("Chat block check:", error);
     alert("Could not check block status: " + friendlyError(error));
   }
 };
 
-// ---------------- PREVENT STARTING BLOCKED CALLS ----------------
+// Prevent sending messages to people YOU have blocked.
+const connectoOriginalSendMessage = sendTextMessage;
 
-const previousStartCall = startCall;
+sendTextMessage = async function() {
+  if (!selectedUser) return;
+
+  try {
+    if (await isContactBlocked(selectedUser.uid)) {
+      alert("Unblock this contact before sending messages.");
+      return;
+    }
+
+    return connectoOriginalSendMessage();
+  } catch (error) {
+    console.error("Message block check:", error);
+    alert("Could not check block status: " + friendlyError(error));
+  }
+};
+
+// Prevent outgoing calls to people YOU have blocked.
+const connectoOriginalStartCall = startCall;
 
 startCall = async function(type) {
-  if (!currentUser || !selectedUser) {
+  if (!selectedUser) {
     alert("First select a contact.");
     return;
   }
 
   try {
-    const allowed = await canInteractWith(selectedUser.uid);
-
-    if (!allowed) {
-      alert("You cannot call this contact because one of you has blocked the other.");
+    if (await isContactBlocked(selectedUser.uid)) {
+      alert("Unblock this contact before calling.");
       return;
     }
 
-    return previousStartCall(type);
-
+    return connectoOriginalStartCall(type);
   } catch (error) {
     console.error("Call block check:", error);
     alert("Could not check block status: " + friendlyError(error));
   }
 };
 
-// ---------------- PREVENT INCOMING CALL UI FROM BLOCKED USERS ----------------
-
-// The Firestore rules deny call creation by blocked users.
-// This extra check prevents showing a call if a block already exists.
-const previousListenForIncomingCalls = listenForIncomingCalls;
-
-listenForIncomingCalls = function() {
-  // Keep the original listener and its existing call functionality.
-  return previousListenForIncomingCalls();
-};
-
-// ---------------- REMOVE CONTACT: HIDE FROM ALL LISTS ----------------
-
-removeContact = async function(person) {
-  if (!currentUser || !person?.uid) return;
-
-  if (!confirm(
-    `Remove ${person.displayName || "this contact"} from your saved contacts?\n\nYour chat history will not be deleted.`
-  )) return;
-
-  try {
-    await deleteDoc(
-      doc(db, "users", currentUser.uid, "contacts", person.uid)
-    );
-
-    // Close the chat if it was open.
-    if (selectedUser?.uid === person.uid) {
-      selectedUser = null;
-      stopMessages = stopListener(stopMessages);
-
-      $("activeName").textContent = "Select a contact";
-      $("activeAvatar").textContent = "?";
-      $("activeStatus").textContent = "";
-
-      $("chatMessages").innerHTML =
-        '<div class="empty">Select a contact to start chatting.</div>';
-
-      document.body.classList.remove("mobile-chat-open");
-    }
-
-    alert("Contact removed. Chat history is preserved.");
-    renderUsers();
-
-  } catch (error) {
-    console.error("Remove contact error:", error);
-    alert("Could not remove contact: " + friendlyError(error));
-  }
-};
-
-// ---------------- START BLOCK LISTENER ----------------
-
-const previousStartAppForBlocks = startApp;
+// Start the blocked contacts listener after login.
+const connectoOriginalStartApp = startApp;
 
 startApp = async function(user) {
-  await previousStartAppForBlocks(user);
+  await connectoOriginalStartApp(user);
 
   if (auth.currentUser?.uid !== user.uid) return;
 
   loadBlockedContacts();
 };
 
-// ---------------- CLEANUP ON LOGOUT ----------------
-
+// Stop the listener after logout.
 onAuthStateChanged(auth, user => {
   if (!user) {
     stopBlockedContacts = stopListener(stopBlockedContacts);
-
     blockedContacts = [];
     blockedIds = new Set();
-
-    searchBlockStatus = {
-      checkedUid: null,
-      blockedByMe: false,
-      blockedByThem: false,
-      checking: false
-    };
   }
 });
 
-// ---------------- FIX DUPLICATE END CALL HANDLER ----------------
-
-// The existing addEventListener already handles the button.
-// Remove the later onclick handler so one click does not run twice.
-if ($("endCallBtn")) {
-  $("endCallBtn").onclick = null;
-}
-
-console.log(
-  "Connecto: remove, block and unblock features loaded."
-);
+console.log("Connecto Block / Unblock feature loaded.");
